@@ -1,0 +1,28 @@
+#some of this was taken from http://devblog.phillipspiess.com/2012/06/17/unity-3-5-free-and-source-control-lessons-learned-from-7dfps/
+
+
+
+Builds
+Debugging Output
+Screenshots
+Source Material
+Temp
+Library
+
+
+
+#(NCarter said any Library folder exceptions were only needed in older version of Unity)
+
+*pidb files are just code completion caching data according to:
+# http://stackoverflow.com/questions/1022111/what-are-monodevelops-pidb-files
+
+
+
+*.csproj
+*.pidb
+*.pidb.meta
+*.sln
+*.unityproj
+*.userprefs
+*.tmproj
+Temp.meta
