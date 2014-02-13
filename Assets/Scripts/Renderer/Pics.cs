@@ -44,7 +44,7 @@ public static class Pics {
 		return (Texture)pics[type][arrIdx];
 	}
 
-	public static Texture GetFirstThatContains(string s) {
+	public static Texture GetFirstWith(string s) { // first that contains this string
 		for (int i = 0; i < (int)ObjectType.Count; i++) {
 			int arrIdx = 0;
 			foreach (var o in pics[i]) {

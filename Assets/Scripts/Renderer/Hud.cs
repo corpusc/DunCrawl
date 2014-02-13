@@ -2,19 +2,20 @@
 using System.Collections;
 
 public class Hud : MonoBehaviour {
+	public HudMode Mode = HudMode.EditPalette;
+	public Texture Brush;
+
 	// private
-	HudMode mode = HudMode.EditPalette;
 	ObjectType curr = ObjectType.Floor;
 	Vector3 mouPos; 
 	Rect screen;
 	int maxTilesAcross = 20;
 	int span = 32;
-	Texture brush;
 
 
 
 	void Start() {
-		brush = Pics.GetFirstThatContains("tab_unselected");
+		Brush = Pics.GetFirstWith("tab_unselected");
 	}
 
 	void OnGUI() {
@@ -25,7 +26,7 @@ public class Hud : MonoBehaviour {
 		mouPos.y = Screen.height - mouPos.y;
 		
 		// hud state machine
-		switch (mode) {
+		switch (Mode) {
 			case HudMode.EditPalette:
 				editPalette();
 				break;
@@ -46,7 +47,7 @@ public class Hud : MonoBehaviour {
 		GUI.DrawTexture(r, Pics.Black);
 		GUI.Label(r, "RMB");
 		r.x -= ds;
-		GUI.DrawTexture(r, brush);
+		GUI.DrawTexture(r, Brush);
 		GUI.Label(r, "LMB");
 	}
 
@@ -59,13 +60,13 @@ public class Hud : MonoBehaviour {
 	void allowChangingMode() {
 		GUILayout.BeginHorizontal();
 		for (int i = 0; i < (int)HudMode.Count; i++) { // object type index
-			if (mode == (HudMode)i)
+			if (Mode == (HudMode)i)
 				GUI.color = Color.magenta;
 			else
 				GUI.color = Color.white;
 
 			if (GUILayout.Button("" + (HudMode)i)) {
-				mode = (HudMode)i;
+				Mode = (HudMode)i;
 			}
 		}
 		GUI.color = Color.white;
@@ -109,7 +110,7 @@ public class Hud : MonoBehaviour {
 				var p = Pics.Get((int)curr, arrIdx+i);
 
 				if (GUILayout.Button(p, GUILayout.MinWidth(bSpan), GUILayout.MinHeight(bSpan))) {
-				    	brush = p;
+				    	Brush = p;
 			    }
 			}
 			
