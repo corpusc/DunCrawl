@@ -97,13 +97,17 @@ public class Game : MonoBehaviour {
 		float speed = 0.06f;
 		int mar = 16; // margin from edge, where we pan camera
 
-		if (mouPos.x > Screen.width - mar)
+		if (mouPos.x > Screen.width - mar &&
+		    Camera.main.transform.position.x < cellsAcross)
 			Camera.main.transform.position += new Vector3(speed, 0, 0);
-		if (mouPos.x < mar)
+		if (mouPos.x < mar &&
+		    Camera.main.transform.position.x > 0)
 			Camera.main.transform.position -= new Vector3(speed, 0, 0);
-		if (mouPos.y > Screen.height - mar)
+		if (mouPos.y > Screen.height - mar &&
+		    Camera.main.transform.position.y < cellsAcross)
 			Camera.main.transform.position += new Vector3(0, speed, 0);
-		if (mouPos.y < mar)
+		if (mouPos.y < mar &&
+		    Camera.main.transform.position.y > 0)
 			Camera.main.transform.position -= new Vector3(0, speed, 0);
 	}
 
@@ -160,6 +164,9 @@ public class Game : MonoBehaviour {
 	}
 		
 	void createQuad(Vector3 pos) {
+		if (hud.Mode != HudMode.EditMap)
+			return;
+
 		bool adding = false;
 		var cl = cells[(int)pos.y, (int)pos.x]; // cell list
 		//Debug.Log("pos.x: " + (int)pos.x + "  pos.y: " + (int)pos.y);
