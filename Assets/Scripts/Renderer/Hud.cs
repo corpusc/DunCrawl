@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Hud : MonoBehaviour {
 	public HudMode Mode = HudMode.EditPalette;
-	public Texture Brush;
+	public PicData Brush = new PicData();
 
 	// private
 	ObjectType curr = ObjectType.Floor;
@@ -15,7 +15,7 @@ public class Hud : MonoBehaviour {
 
 
 	void Start() {
-		Brush = Pics.GetFirstWith("tab_unselected");
+		Brush.Pic = Pics.GetFirstWith("tab_unselected");
 	}
 
 	void OnGUI() {
@@ -28,7 +28,7 @@ public class Hud : MonoBehaviour {
 		// hud state machine
 		switch (Mode) {
 			case HudMode.EditPalette:
-				editPalette();
+				drawTextureChoosingGrid();
 				break;
 //			case HudMode.Playing:
 //				commonChrome();
@@ -47,7 +47,7 @@ public class Hud : MonoBehaviour {
 		GUI.DrawTexture(r, Pics.Black);
 		GUI.Label(r, "RMB");
 		r.x -= ds;
-		GUI.DrawTexture(r, Brush);
+		GUI.DrawTexture(r, Brush.Pic);
 		GUI.Label(r, "LMB");
 	}
 
@@ -61,7 +61,7 @@ public class Hud : MonoBehaviour {
 		GUILayout.BeginHorizontal();
 		for (int i = 0; i < (int)HudMode.Count; i++) { // object type index
 			if (Mode == (HudMode)i)
-				GUI.color = Color.magenta;
+				GUI.color = Color.cyan;
 			else
 				GUI.color = Color.white;
 
@@ -74,7 +74,7 @@ public class Hud : MonoBehaviour {
 	}
 
 	Vector2 scroll = Vector2.zero;
-	void editPalette() { // draw all textures to choose from
+	void drawTextureChoosingGrid() { // draw all textures to choose from
 		GUI.DrawTexture(screen, Pics.Black);
 		GUILayout.BeginArea(screen);
 
@@ -84,7 +84,7 @@ public class Hud : MonoBehaviour {
 		GUILayout.BeginHorizontal();
 		for (int oIdx = 0; oIdx < (int)ObjectType.Count; oIdx++) { // object type index
 			if (curr == (ObjectType)oIdx)
-				GUI.color = Color.magenta;
+				GUI.color = Color.cyan;
 			else
 				GUI.color = Color.white;
 
@@ -110,7 +110,9 @@ public class Hud : MonoBehaviour {
 				var p = Pics.Get((int)curr, arrIdx+i);
 
 				if (GUILayout.Button(p, GUILayout.MinWidth(bSpan), GUILayout.MinHeight(bSpan))) {
-				    	Brush = p;
+			    	Brush.Pic = p;
+					Brush.Type = curr;
+					Mode = HudMode.EditMap;
 			    }
 			}
 			

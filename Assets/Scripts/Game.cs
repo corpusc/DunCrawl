@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Game : MonoBehaviour {
 	// private
@@ -11,12 +12,13 @@ public class Game : MonoBehaviour {
 		// this way we don't have a bunch of objects in the scene just to represent every single blank cell.
 		// instead, we only store and do calculations on objects that the player can see and interact with.
 
+	// in-world ui 
 	// quad positioning and spans
-	int cellsAcross = 10;
+	const int cellsAcross = 16;
 	Vector3 horiBarCenter;
 	Vector3 vertBarCenter;
-	Vector3 pastX;
-	Vector3 pastY;
+	Vector3 pastMaxX;
+	Vector3 pastMaxY;
 	Vector3 stretchX;
 	Vector3 stretchY;
 
@@ -24,10 +26,13 @@ public class Game : MonoBehaviour {
 	Texture cursOk; // for valid cursor
 	Texture cursBad; // for invalid cursor
 
+	List<PicData>[,] cells = new List<PicData>[cellsAcross, cellsAcross];
+
 
 
 	void Start() {
 		hud = this.GetComponent<Hud>();
+
 
 		cursOk = Pics.GetFirstWith("cursor");
 		cursBad = Pics.GetFirstWith("cursor_red");
@@ -35,13 +40,13 @@ public class Game : MonoBehaviour {
 		var bumpDown = new Vector3(0, -1, 0);
 		var farBack = new Vector3(0, 0, 30);
 
-		setQuadPositioningAndSpans(cellsAcross);
+		setQuadPositioningAndSpans();
 		Camera.main.transform.position = new Vector3(cellsAcross/2, cellsAcross/2, 0); // put in the middle of floor
 
 		// make the boundaries of the floor
 		// top edge
 		var v = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		v.transform.position = farBack + horiBarCenter + pastY;
+		v.transform.position = farBack + horiBarCenter + pastMaxY;
 		v.transform.localScale = stretchX;
 		//Debug.Log ("top edge - transform.position: " + transform.position);
 		v.renderer.material.shader = Shader.Find("Unlit/Transparent");
@@ -64,14 +69,14 @@ public class Game : MonoBehaviour {
 		
 		// right edge
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		v.transform.position = farBack + vertBarCenter + pastX;
+		v.transform.position = farBack + vertBarCenter + pastMaxX;
 		v.transform.localScale = stretchY;
 		v.renderer.material.shader = Shader.Find("Unlit/Transparent");
 		v.renderer.material.mainTexture = Pics.GetFirstWith("cursor_green");
 	
 
 		
-		// floor
+		// the backdrop of valid floor space
 		entireFloor = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		entireFloor.transform.position = farBack + horiBarCenter + vertBarCenter;
 		entireFloor.transform.localScale = Vector3.Scale(stretchX, stretchY);
@@ -120,12 +125,16 @@ public class Game : MonoBehaviour {
 			if (Input.GetMouseButtonDown(0)) {
 				createQuad(mouWorldPos);
 			}
-			
+			if (Input.GetMouseButtonDown(1)) {
+				destroyQuad(mouWorldPos);
+			}
+
 			if (!(x == prevX && y == prevY)) {
 				// we just moved to a new cell
-				if (Input.GetMouseButton(0)) {
+				if (Input.GetMouseButton(0))
 					createQuad(mouWorldPos);
-				}
+				if (Input.GetMouseButton(1))
+					destroyQuad(mouWorldPos);
 			}
 
 			prevX = x;
@@ -139,12 +148,54 @@ public class Game : MonoBehaviour {
 		cursorCell.transform.position = mouWorldPos;
 	}
 	
+	void destroyQuad(Vector3 pos) {
+		var cl = cells[(int)pos.y, (int)pos.x]; // cell list
+		
+		if (cl == null || cl.Count < 1)
+			return;
+
+		Destroy(cl[cl.Count-1].GameObject);
+		cl.RemoveAt(cl.Count-1);
+		Debug.Log("destroyQuad()");
+	}
+		
 	void createQuad(Vector3 pos) {
-		Debug.Log("createQuad()");
-		var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		o.transform.position = mouWorldPos;
-		o.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		o.renderer.material.mainTexture = hud.Brush;
+		bool adding = false;
+		var cl = cells[(int)pos.y, (int)pos.x]; // cell list
+		//Debug.Log("pos.x: " + (int)pos.x + "  pos.y: " + (int)pos.y);
+
+		if (cl == null) {
+			cl = cells[(int)pos.y, (int)pos.x] = new List<PicData>();
+			Debug.Log("cell was null, made a new list");
+		}
+		
+		if (cl.Count < 1) {
+			adding = true;
+			Debug.Log("cell had empty list");
+		}
+
+		// replace if brush is the same type as something else in the list
+		for (int i = cl.Count-1; i >= 0; i--) {
+			Debug.Log("at least one PicData here");
+
+			if (cl[i].Type == hud.Brush.Type) {
+				Destroy(cl[i].GameObject);
+				cl.RemoveAt(i);
+				adding = true;
+			}
+		}
+
+		if (adding) {
+			var pd = new PicData();
+			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
+			o.transform.position = pos;
+			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
+			o.renderer.material.mainTexture = 
+				pd.Pic = hud.Brush.Pic;
+			pd.Type = hud.Brush.Type;
+			pd.GameObject = o;
+			cells[(int)pos.y, (int)pos.x].Add(pd);
+		}
 	}
 
 	bool scaledUnitSquareContains(Vector3 v, GameObject o) {
@@ -160,12 +211,11 @@ public class Game : MonoBehaviour {
 		}
 	}
 
-	void setQuadPositioningAndSpans(int i) {
-		cellsAcross = i;
+	void setQuadPositioningAndSpans() {
 		horiBarCenter = new Vector3(cellsAcross*0.5f-0.5f, 0, 0);
 		vertBarCenter = new Vector3(0, cellsAcross*0.5f-0.5f, 0);
-		pastX = new Vector3(cellsAcross, 0, 0);
-		pastY = new Vector3(0, cellsAcross, 0);
+		pastMaxX = new Vector3(cellsAcross, 0, 0);
+		pastMaxY = new Vector3(0, cellsAcross, 0);
 		stretchX = new Vector3(cellsAcross, 1, 1);
 		stretchY = new Vector3(1, cellsAcross, 1);
 	}
