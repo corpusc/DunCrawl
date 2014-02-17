@@ -6,7 +6,7 @@ public class Hud : MonoBehaviour {
 	public PicData Brush = new PicData();
 
 	// private
-	ObjectType curr = ObjectType.Floor;
+	ObjectType currType = ObjectType.Floor;
 	Vector3 mouPos; 
 	Rect screen;
 	int maxTilesAcross = 20;
@@ -40,6 +40,45 @@ public class Hud : MonoBehaviour {
 				commonChrome();
 				break;
 		}
+	}
+
+	string[] mapNames;
+	void loadMapNames() {
+		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are ksy
+		mapNames = dir.Split('-');
+		var data = PlayerPrefs.GetString("HighScores");
+		if(!string.IsNullOrEmpty(data))	{
+			var b = new BinaryFormatter();
+			var m = new MemoryStream(Convert.FromBase64String(data));
+			highScores = (List<ScoreEntry>)b.Deserialize(m);
+		}
+	}
+
+	void loadMap(string mapName) {
+		var data = PlayerPrefs.GetString(mapName);
+
+		if (!string.IsNullOrEmpty(data)) {
+			var b = new BinaryFormatter();
+			var m = new MemoryStream(Convert.FromBase64String(data));
+			highScores = (List<ScoreEntry>)b.Deserialize(m);
+		}
+	}
+
+	void saveMap(string name) {
+		var b = new BinaryFormatter();
+		var m = new MemoryStream();
+		b.Serialize(m, highScores);
+		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are ksy
+		// into PlayerPrefs
+		dir += "-" + name;
+		PlayerPrefs.SetString("Directory", dir);
+		PlayerPrefs.SetString(name, Convert.ToBase64String(m.GetBuffer()));
+	}
+
+	void commonChrome() { // most modes would be always drawing these graphics
+		GUILayout.BeginArea(screen);
+		allowChangingMode();
+		GUILayout.EndArea();
 		
 		// draw ERASE graphic, then BRUSH graphic.... in bottom right corner
 		int ds = span*2; // double span
@@ -49,12 +88,6 @@ public class Hud : MonoBehaviour {
 		r.x -= ds;
 		GUI.DrawTexture(r, Brush.Pic);
 		GUI.Label(r, "LMB");
-	}
-
-	void commonChrome() { // most modes would be always drawing these graphics
-		GUILayout.BeginArea(screen);
-		allowChangingMode();
-		GUILayout.EndArea();
 	}
 
 	void allowChangingMode() {
@@ -83,13 +116,13 @@ public class Hud : MonoBehaviour {
 		// show the diff types/folders
 		GUILayout.BeginHorizontal();
 		for (int oIdx = 0; oIdx < (int)ObjectType.Count; oIdx++) { // object type index
-			if (curr == (ObjectType)oIdx)
+			if (currType == (ObjectType)oIdx)
 				GUI.color = Color.cyan;
 			else
 				GUI.color = Color.white;
 
 			if (GUILayout.Button("" + (ObjectType)oIdx)) {
-				curr = (ObjectType)oIdx;
+				currType = (ObjectType)oIdx;
 			}
 		}
 		GUI.color = Color.white;
@@ -99,7 +132,7 @@ public class Hud : MonoBehaviour {
 
 		int bSpan = span + span/2; // button span, cuz it has borders
 		int maxInRow = Screen.width / (bSpan+8);
-		int num = Pics.GetArrayCount((int)curr);
+		int num = Pics.GetArrayCount((int)currType);
 		int arrIdx = 0;
 		while (arrIdx < num) {
 			GUILayout.BeginHorizontal();
@@ -107,11 +140,11 @@ public class Hud : MonoBehaviour {
 			     arrIdx+i < num && i < maxInRow; 
 			     i++) 
 			{ // Texture array index
-				var p = Pics.Get((int)curr, arrIdx+i);
+				var p = Pics.Get((int)currType, arrIdx+i);
 
 				if (GUILayout.Button(p, GUILayout.MinWidth(bSpan), GUILayout.MinHeight(bSpan))) {
 			    	Brush.Pic = p;
-					Brush.Type = curr;
+					Brush.Type = currType;
 					Mode = HudMode.EditMap;
 			    }
 			}

@@ -9,6 +9,8 @@ public enum HudMode {
 	//Dead,        this shouldn't be choosable, so might as well keep disabled until we have player death
 	EditMap,
 	EditPalette,
+	SaveMap,
+	LoadMap,
 	
 	Count // used for iterating thru these types
 };
