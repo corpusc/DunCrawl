@@ -32,7 +32,7 @@ public class MapEditor : MonoBehaviour {
 	Texture cursOk; // for valid cursor
 	Texture cursBad; // for invalid cursor
 
-	List<PicData>[,] cells = new List<PicData>[cellsAcross, cellsAcross];
+	List<TileDataRealtime>[,] cellsRealtime = new List<TileDataRealtime>[cellsAcross, cellsAcross];
 
 
 
@@ -160,7 +160,7 @@ public class MapEditor : MonoBehaviour {
 	}
 	
 	void destroyQuad(Vector3 pos) {
-		var cl = cells[(int)pos.y, (int)pos.x]; // cell list
+		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
 		
 		if (cl == null || cl.Count < 1)
 			return;
@@ -175,11 +175,11 @@ public class MapEditor : MonoBehaviour {
 			return;
 
 		bool adding = false;
-		var cl = cells[(int)pos.y, (int)pos.x]; // cell list
+		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
 		//Debug.Log("pos.x: " + (int)pos.x + "  pos.y: " + (int)pos.y);
 
 		if (cl == null) {
-			cl = cells[(int)pos.y, (int)pos.x] = new List<PicData>();
+			cl = cellsRealtime[(int)pos.y, (int)pos.x] = new List<TileDataRealtime>();
 			Debug.Log("cell was null, made a new list");
 		}
 		
@@ -200,7 +200,7 @@ public class MapEditor : MonoBehaviour {
 		}
 
 		if (adding) {
-			var pd = new PicData();
+			var pd = new TileDataRealtime();
 			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			o.transform.position = pos;
 			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
@@ -208,7 +208,7 @@ public class MapEditor : MonoBehaviour {
 				pd.Pic = hud.Brush.Pic;
 			pd.Type = hud.Brush.Type;
 			pd.GameObject = o;
-			cells[(int)pos.y, (int)pos.x].Add(pd);
+			cellsRealtime[(int)pos.y, (int)pos.x].Add(pd);
 		}
 	}
 
@@ -269,7 +269,18 @@ public class MapEditor : MonoBehaviour {
 
 		var bf = new BinaryFormatter();
 		var ms = new MemoryStream();
-		bf.Serialize(ms, cells);
+		bf.Serialize(ms, cellsRealtime);
 		PlayerPrefs.SetString(name, Convert.ToBase64String(ms.GetBuffer()));
+	}
+
+	public string ProblemWithName(string name) {
+		// check that map name is not empty, and that it doesn't contain the .Split seperator char
+		if (name.Contains("" + splitSeperator)) {
+			return "CANNOT USE '" + splitSeperator + "' !!!";
+		}else if (string.IsNullOrEmpty(name)) {
+			return "TYPE IN A NAME!!!";
+		}else{
+			return null;
+		}
 	}
 }

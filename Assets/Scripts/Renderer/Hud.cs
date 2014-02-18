@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Hud : MonoBehaviour {
 	public HudMode Mode = HudMode.EditPalette;
-	public PicData Brush = new PicData();
-	public string MapName = "map name";
+	public TileDataRealtime Brush = new TileDataRealtime();
+	public string MapName;
 
 	// private
 	MapEditor mapEditor;
@@ -13,10 +13,14 @@ public class Hud : MonoBehaviour {
 	Rect screen;
 	int maxTilesAcross = 20;
 	int span = 32;
+	Color highlighted = Color.magenta;
+	Color editBox = Color.magenta;
+	string defaultEditBox = "Type name here";
 
 
 
 	void Start() {
+		MapName = defaultEditBox;
 		Brush.Pic = Pics.GetFirstWith("tab_unselected");
 		mapEditor = GetComponent<MapEditor>();
 	}
@@ -47,7 +51,7 @@ public class Hud : MonoBehaviour {
 
 	void commonChrome() { // most modes would be always drawing these graphics
 		GUILayout.BeginArea(screen);
-		allowChangingMode();
+		mainMenu();
 		GUILayout.EndArea();
 		
 		// draw ERASE graphic, then BRUSH graphic.... in bottom right corner
@@ -60,30 +64,37 @@ public class Hud : MonoBehaviour {
 		GUI.Label(r, "LMB");
 	}
 
-	void allowChangingMode() {
+	void mainMenu() {
 		GUILayout.BeginHorizontal();
 		for (int i = 0; i < (int)HudMode.Count; i++) { // object type index
-			if (Mode == (HudMode)i) {
-				GUI.color = Color.cyan;
-
+			var cmi = (HudMode)i; // current mode iteration for this loop (not the "Mode" we're in)
+			
+			if (Mode == cmi) {
+				GUI.color = editBox;
 				if (Mode == HudMode.SaveMap)
 					MapName = GUILayout.TextField(MapName, 25);
-			}else
+				GUI.color = highlighted;
+			}else{
 				GUI.color = Color.white;
+			}
 
-			if (GUILayout.Button("" + (HudMode)i)) {
+			if (GUILayout.Button("" + cmi)) {
 				if (Mode == HudMode.SaveMap) {
-					// check that map name is not empty, and that it doesn't contain the .Split seperator char
-					if (MapName.Contains("" + splitSeperator)) {
-						MapName = "CANNOT USE '" + splitSeperator + "' !!!";
-					}else if (string.IsNullOrEmpty(MapName)) {
-						MapName = "TYPE IN A NAME!!!";
-					}else{
+					var prob = mapEditor.ProblemWithName(MapName);
+
+					if (prob == null) {
 						mapEditor.SaveMap(MapName);
 						Mode = HudMode.EditMap;
+
+						MapName = defaultEditBox;
+						editBox = highlighted;
+					}else{
+						MapName = prob;
+						editBox = Color.red;
 					}
-				}else // for all other modes, we just switch to that mode
-					Mode = (HudMode)i;
+				}else{ // for all other modes, we just switch to that mode
+					Mode = cmi;
+				}
 			}
 		}
 		GUI.color = Color.white;
@@ -95,13 +106,13 @@ public class Hud : MonoBehaviour {
 		GUI.DrawTexture(screen, Pics.Black);
 		GUILayout.BeginArea(screen);
 
-		allowChangingMode();
+		mainMenu();
 
 		// show the diff types/folders
 		GUILayout.BeginHorizontal();
 		for (int oIdx = 0; oIdx < (int)ObjectType.Count; oIdx++) { // object type index
 			if (currType == (ObjectType)oIdx)
-				GUI.color = Color.cyan;
+				GUI.color = highlighted;
 			else
 				GUI.color = Color.white;
 
