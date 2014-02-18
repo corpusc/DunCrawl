@@ -3,7 +3,8 @@ using System.Collections;
 
 public class Hud : MonoBehaviour {
 	public HudMode Mode = HudMode.EditPalette;
-	public TileDataRealtime Brush = new TileDataRealtime();
+	public ObjectType BrushType;
+	public Texture BrushPic;
 	public string MapName;
 
 	// private
@@ -21,7 +22,8 @@ public class Hud : MonoBehaviour {
 
 	void Start() {
 		MapName = defaultEditBox;
-		Brush.Pic = Pics.GetFirstWith("tab_unselected");
+		BrushType = currType;
+		BrushPic = Pics.GetFirstWith("tab_unselected");
 		mapEditor = GetComponent<MapEditor>();
 	}
 
@@ -60,7 +62,7 @@ public class Hud : MonoBehaviour {
 		GUI.DrawTexture(r, Pics.Black);
 		GUI.Label(r, "RMB");
 		r.x -= ds;
-		GUI.DrawTexture(r, Brush.Pic);
+		GUI.DrawTexture(r, BrushPic);
 		GUI.Label(r, "LMB");
 	}
 
@@ -138,8 +140,8 @@ public class Hud : MonoBehaviour {
 				var p = Pics.Get((int)currType, arrIdx+i);
 
 				if (GUILayout.Button(p, GUILayout.MinWidth(bSpan), GUILayout.MinHeight(bSpan))) {
-			    	Brush.Pic = p;
-					Brush.Type = currType;
+			    	BrushPic = p;
+					BrushType = currType;
 					Mode = HudMode.EditMap;
 			    }
 			}

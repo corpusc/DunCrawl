@@ -20,7 +20,6 @@ public class MapEditor : MonoBehaviour {
 
 	// in-world chrome 
 	// quad positioning and spans
-	const int cellsAcross = 16;
 	Vector3 horiBarCenter;
 	Vector3 vertBarCenter;
 	Vector3 pastMaxX;
@@ -32,7 +31,8 @@ public class MapEditor : MonoBehaviour {
 	Texture cursOk; // for valid cursor
 	Texture cursBad; // for invalid cursor
 
-	List<TileDataRealtime>[,] cellsRealtime = new List<TileDataRealtime>[cellsAcross, cellsAcross];
+	// realtime version of map
+	List<TileDataRealtime>[,] cellsRealtime = new List<TileDataRealtime>[S.CellsAcross, S.CellsAcross];
 
 
 
@@ -47,7 +47,7 @@ public class MapEditor : MonoBehaviour {
 		var farBack = new Vector3(0, 0, 30);
 
 		setQuadPositioningAndSpans();
-		Camera.main.transform.position = new Vector3(cellsAcross/2, cellsAcross/2, 0); // put in the middle of floor
+		Camera.main.transform.position = new Vector3(S.CellsAcross/2, S.CellsAcross/2, 0); // put in the middle of floor
 
 		// make the boundaries of the floor
 		// top edge
@@ -104,13 +104,13 @@ public class MapEditor : MonoBehaviour {
 		int mar = 16; // margin from edge, where we pan camera
 
 		if (mouPos.x > Screen.width - mar &&
-		    Camera.main.transform.position.x < cellsAcross)
+		    Camera.main.transform.position.x < S.CellsAcross)
 			Camera.main.transform.position += new Vector3(speed, 0, 0);
 		if (mouPos.x < mar &&
 		    Camera.main.transform.position.x > 0)
 			Camera.main.transform.position -= new Vector3(speed, 0, 0);
 		if (mouPos.y > Screen.height - mar &&
-		    Camera.main.transform.position.y < cellsAcross)
+		    Camera.main.transform.position.y < S.CellsAcross)
 			Camera.main.transform.position += new Vector3(0, speed, 0);
 		if (mouPos.y < mar &&
 		    Camera.main.transform.position.y > 0)
@@ -192,7 +192,7 @@ public class MapEditor : MonoBehaviour {
 		for (int i = cl.Count-1; i >= 0; i--) {
 			Debug.Log("at least one PicData here");
 
-			if (cl[i].Type == hud.Brush.Type) {
+			if (cl[i].Type == hud.BrushType) {
 				Destroy(cl[i].GameObject);
 				cl.RemoveAt(i);
 				adding = true;
@@ -200,15 +200,14 @@ public class MapEditor : MonoBehaviour {
 		}
 
 		if (adding) {
-			var pd = new TileDataRealtime();
+			var td = new TileDataRealtime();
 			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			o.transform.position = pos;
 			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
-			o.renderer.material.mainTexture = 
-				pd.Pic = hud.Brush.Pic;
-			pd.Type = hud.Brush.Type;
-			pd.GameObject = o;
-			cellsRealtime[(int)pos.y, (int)pos.x].Add(pd);
+			o.renderer.material.mainTexture = hud.BrushPic;
+			td.Type = hud.BrushType;
+			td.GameObject = o;
+			cellsRealtime[(int)pos.y, (int)pos.x].Add(td);
 		}
 	}
 
@@ -226,12 +225,12 @@ public class MapEditor : MonoBehaviour {
 	}
 
 	void setQuadPositioningAndSpans() {
-		horiBarCenter = new Vector3(cellsAcross*0.5f-0.5f, 0, 0);
-		vertBarCenter = new Vector3(0, cellsAcross*0.5f-0.5f, 0);
-		pastMaxX = new Vector3(cellsAcross, 0, 0);
-		pastMaxY = new Vector3(0, cellsAcross, 0);
-		stretchX = new Vector3(cellsAcross, 1, 1);
-		stretchY = new Vector3(1, cellsAcross, 1);
+		horiBarCenter = new Vector3(S.CellsAcross*0.5f-0.5f, 0, 0);
+		vertBarCenter = new Vector3(0, S.CellsAcross*0.5f-0.5f, 0);
+		pastMaxX = new Vector3(S.CellsAcross, 0, 0);
+		pastMaxY = new Vector3(0, S.CellsAcross, 0);
+		stretchX = new Vector3(S.CellsAcross, 1, 1);
+		stretchY = new Vector3(1, S.CellsAcross, 1);
 	}
 	
 	string[] mapNames;
@@ -267,9 +266,40 @@ public class MapEditor : MonoBehaviour {
 			dir += splitSeperator + name;
 		PlayerPrefs.SetString("Directory", dir);
 
+		// make tiny version of map for saving
+		MapFormat mapFormat = new MapFormat();
+		for (int y = 0; y < S.CellsAcross; y++) {
+			for (int x = 0; x < S.CellsAcross; x++) {
+				if (cellsRealtime[y,x] != null && 
+				    cellsRealtime[y,x].Count > 0)
+				{
+					mapFormat.Cells[y,x] = new List<TileData>();
+
+					foreach (var rt in cellsRealtime[y,x]) {
+						var picName = rt.GameObject.renderer.material.mainTexture.name;
+						int ti = mapFormat.Types.IndexOf("" + rt.Type); // type index
+						int pi = mapFormat.Pics.IndexOf(picName);   // pic index
+
+						if (ti < 0) {
+							ti = mapFormat.Types.Count;
+							mapFormat.Types.Add("" + rt.Type);
+						}
+						if (pi < 0) {
+							pi = mapFormat.Pics.Count;
+							mapFormat.Pics.Add(picName);
+						}
+
+						var td = new TileData();
+						td.Type = (ObjectType)ti; 
+						td.Pic = pi;
+						mapFormat.Cells[y,x].Add(td);
+					}
+				}			
+			}
+		}            // convert .pic from texture to int (in realtime version) 
 		var bf = new BinaryFormatter();
 		var ms = new MemoryStream();
-		bf.Serialize(ms, cellsRealtime);
+		bf.Serialize(ms, mapFormat);
 		PlayerPrefs.SetString(name, Convert.ToBase64String(ms.GetBuffer()));
 	}
 
