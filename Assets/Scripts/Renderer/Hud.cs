@@ -144,7 +144,7 @@ public class Hud : MonoBehaviour {
 
 		int bSpan = span + span/2; // button span, cuz it has borders
 		int maxInRow = Screen.width / (bSpan+8);
-		int num = Pics.GetArrayCount((int)currType);
+		int num = Pics.GetArrayCount("" + currType);
 		int arrIdx = 0;
 		while (arrIdx < num) {
 			GUILayout.BeginHorizontal();
@@ -152,7 +152,7 @@ public class Hud : MonoBehaviour {
 			     arrIdx+i < num && i < maxInRow; 
 			     i++) 
 			{ // Texture array index
-				var p = Pics.Get((int)currType, arrIdx+i);
+				var p = Pics.Get(currType, arrIdx+i);
 
 				if (GUILayout.Button(p, GUILayout.MinWidth(bSpan), GUILayout.MinHeight(bSpan))) {
 			    	BrushPic = p;

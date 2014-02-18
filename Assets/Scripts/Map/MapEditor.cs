@@ -245,19 +245,39 @@ public class MapEditor : MonoBehaviour {
 	
 	public void LoadMap(string name) {
 		Debug.Log("LoadMap(" + name + ")");
-		//		var data = PlayerPrefs.GetString(name);
-		//
-		//		if (!string.IsNullOrEmpty(data)) {
-		//			var b = new BinaryFormatter();
-		//			var m = new MemoryStream(Convert.FromBase64String(data));
-		//			highScores = (List<ScoreEntry>)b.Deserialize(m);
-		//		}
+
+		var d = PlayerPrefs.GetString(name);
+
+		if (string.IsNullOrEmpty(d)) {
+			Debug.LogError("LoadMap(" + name + ") was not able to get any map data!");
+		}else{
+			var bf = new BinaryFormatter();
+			var ms = new MemoryStream(Convert.FromBase64String(d));
+			var mf = (MapFormat)bf.Deserialize(ms);
+
+			cellsRealtime = new List<TileDataRealtime>[S.CellsAcross, S.CellsAcross];
+			for (int y = 0; y < S.CellsAcross; y++) {
+				for (int x = 0; x < S.CellsAcross; x++) {
+					if (mf.Cells[y,x] != null && 
+					    mf.Cells[y,x].Count > 0)
+					{
+						foreach (var c in mf.Cells[y,x]) {
+							var rt = new TileDataRealtime();
+							rt.Type = (ObjectType)Enum.Parse(typeof(ObjectType), mf.Types[(int)c.Type]);
+							var pic = Pics.Get("" + rt.Type, mf.Pics[c.Pic]);
+
+							//cellsRealtime[y,x]
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public void SaveMap(string name) { 
-		//FIXME: need to check that there isn't already a key/map with that name!
+		// FIXME: need to check that there isn't already a key/map with that name!
 		// (to warn about losing existing map if proceeding)
-		Debug.Log("SaveMap()");
+		Debug.Log("SaveMap(" + name + ")");
 
 		// add entry to our directory key (
 		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are keys	into PlayerPrefs

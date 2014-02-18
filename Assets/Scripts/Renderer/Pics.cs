@@ -13,7 +13,7 @@ public static class Pics {
 
 	// private
 	//const int numTypes = (int)ObjectType.Count;
-	static List<Object[]> pics = new List<Object[]>();
+	static Dictionary<string, Object[]> pics = new Dictionary<string, Object[]>();
 
 
 
@@ -21,11 +21,12 @@ public static class Pics {
 		// load a list of textures for every ObjectType (folders with the same name)
 		for (int i = 0; i < (int)ObjectType.Count; i++) {
 			string s = "";
+			var ot = (ObjectType)i;
 			
-			Debug.Log("_____________________" + (ObjectType)i + "_____________________");
-			pics.Add(Resources.LoadAll<Texture>("Pics/DCStoneSoup/" +(ObjectType)i));
+			Debug.Log("_____________________" + ot + "_____________________");
+			pics.Add("" + ot, Resources.LoadAll<Texture>("Pics/DCStoneSoup/" + ot));
 
-			foreach (var o in pics[pics.Count-1]) {
+			foreach (var o in pics["" + ot]) {
 				s += o.name + ", ";
 
 				if (o.name == "black")
@@ -36,22 +37,29 @@ public static class Pics {
 		}
 	}	
 	
-	public static int GetArrayCount(int type) {
+	public static int GetArrayCount(string type) {
 		return pics[type].Length;
 	}
 	
-	static public Texture Get(int type, int arrIdx) {
-		return (Texture)pics[type][arrIdx];
+	static public Texture Get(ObjectType objectType, int arrIdx) {
+		return (Texture)pics["" + objectType][arrIdx];
 	}
+	
+	static public Texture Get(string type, string name) {
+		foreach (var o in pics[type]) {
+			if (o.name == name)
+				return (Texture)o;
+		}
 
+		return null;
+	}
+	
 	public static Texture GetFirstWith(string s) { // first that contains this string
 		for (int i = 0; i < (int)ObjectType.Count; i++) {
-			int arrIdx = 0;
-			foreach (var o in pics[i]) {
+			var ot = (ObjectType)i;
+			foreach (var o in pics["" + ot]) {
 				if (o.name.Contains(s))
-				    return (Texture)pics[i][arrIdx];
-
-			    arrIdx++;
+				    return (Texture)o;
 			}
 		}
 
