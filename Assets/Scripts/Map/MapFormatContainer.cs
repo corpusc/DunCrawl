@@ -2,16 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 // for saving/loading via BinaryFormatter
-//using System;
-//using System.IO;
-using System.Runtime;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
+using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 
 
-//[SerializableAttribute]
 [Serializable]
 public class MapFormatContainer {
 	// lists of strings, of only the types and textures used in this map.
@@ -20,14 +16,11 @@ public class MapFormatContainer {
 	// our types and texture library while preserving integrity of older maps.
 	// (a simplistic indexing scheme would cause the indexes to change as the
 	// types/textures library was changed)
-	[Serializable]
-	public class MapFormat {
 	public List<string> Types = new List<string>();
 	public List<string> Pics = new List<string>(); // textures
 	
 	public List<TileData>[,] Cells = new List<TileData>[S.CellsAcross, S.CellsAcross];
-	}
-	
+
 	// .......then the grid of cells 
 	// 		* which are stacks of TileData, which only stores index numbers into those 2 string lists
 

@@ -255,7 +255,9 @@ public class MapEditor : MonoBehaviour {
 		//		}
 	}
 	
-	public void SaveMap(string name) { //FIXME: need to check that there isn't already a key/map with that name!
+	public void SaveMap(string name) { 
+		//FIXME: need to check that there isn't already a key/map with that name!
+		// (to warn about losing existing map if proceeding)
 		Debug.Log("saveMap()");
 
 		// add entry to our directory key (
@@ -267,39 +269,39 @@ public class MapEditor : MonoBehaviour {
 		PlayerPrefs.SetString("Directory", dir);
 
 		// make tiny version of map for saving
-		MapFormat mapFormat = new MapFormat();
+		var mf = new MapFormatContainer();
 		for (int y = 0; y < S.CellsAcross; y++) {
 			for (int x = 0; x < S.CellsAcross; x++) {
 				if (cellsRealtime[y,x] != null && 
 				    cellsRealtime[y,x].Count > 0)
 				{
-					mapFormat.Cells[y,x] = new List<TileData>();
+					mf.Cells[y,x] = new List<TileData>();
 
 					foreach (var rt in cellsRealtime[y,x]) {
 						var picName = rt.GameObject.renderer.material.mainTexture.name;
-						int ti = mapFormat.Types.IndexOf("" + rt.Type); // type index
-						int pi = mapFormat.Pics.IndexOf(picName);   // pic index
+						int ti = mf.Types.IndexOf("" + rt.Type); // type index
+						int pi = mf.Pics.IndexOf(picName);   // pic index
 
 						if (ti < 0) {
-							ti = mapFormat.Types.Count;
-							mapFormat.Types.Add("" + rt.Type);
+							ti = mf.Types.Count;
+							mf.Types.Add("" + rt.Type);
 						}
 						if (pi < 0) {
-							pi = mapFormat.Pics.Count;
-							mapFormat.Pics.Add(picName);
+							pi = mf.Pics.Count;
+							mf.Pics.Add(picName);
 						}
 
 						var td = new TileData();
 						td.Type = (ObjectType)ti; 
 						td.Pic = pi;
-						mapFormat.Cells[y,x].Add(td);
+						mf.Cells[y,x].Add(td);
 					}
 				}			
 			}
-		}            // convert .pic from texture to int (in realtime version) 
+		}
 		var bf = new BinaryFormatter();
 		var ms = new MemoryStream();
-		bf.Serialize(ms, mapFormat);
+		bf.Serialize(ms, mf);
 		PlayerPrefs.SetString(name, Convert.ToBase64String(ms.GetBuffer()));
 	}
 

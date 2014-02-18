@@ -82,11 +82,11 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 49096136}
+  - 50: {fileID: 49096140}
   - 114: {fileID: 49096135}
   - 114: {fileID: 49096137}
-  - 50: {fileID: 49096140}
   m_Layer: 0
-  m_Name: Game
+  m_Name: Main Program
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -100,9 +100,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 49096134}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0fd346c75a41cb04a88cd0a444f35535, type: 3}
+  m_Script: {fileID: 11500000, guid: 99cbd47f1bf97584e99c484f6dd68dab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Mode: 1
+  BrushType: 0
+  BrushPic: {fileID: 0}
+  MapName: map name
 --- !u!4 &49096136
 Transform:
   m_ObjectHideFlags: 0
@@ -122,11 +126,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 49096134}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99cbd47f1bf97584e99c484f6dd68dab, type: 3}
+  m_Script: {fileID: 11500000, guid: 8bd6cf1d9c5f6be4c85af981aca3fc56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Mode: 1
-  Brush: {fileID: 0}
 --- !u!50 &49096140
 Rigidbody2D:
   m_ObjectHideFlags: 0
