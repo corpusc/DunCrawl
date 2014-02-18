@@ -1,6 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+
+
+
+
+
+
+// CURRENTLY THIS FILE IS JUST AN UNUSED SIMPLE EXAMPLE OF SIMPLE PHYSICS BEING APPLIED TO A DYNAMIC GAME OBJECT
+
+
+
+
+
+
+
+
+
 public class Controls : MonoBehaviour {
 	public float force;
 	private Rigidbody2D sphere;
@@ -13,6 +30,7 @@ public class Controls : MonoBehaviour {
 	
 	void Update() {
 		if (transform.position.y < 4f && Input.GetKeyDown (KeyCode.Space)) {
+			// reset dynamics of sphere
 			sphere.isKinematic = true;
 			sphere.isKinematic = false;
 			

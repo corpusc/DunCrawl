@@ -7,9 +7,10 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 
-public class Game : MonoBehaviour {
+public class MapEditor : MonoBehaviour {
 	// private
 	Hud hud;
+	char splitSeperator = '-';
 	Vector3 mouPos; // mouse position on screen
 	Vector3 mouWorldPos; // mouse position in the world
 	GameObject cursorCell; // what the selection pointer is hovering-over/pointing-at
@@ -17,7 +18,7 @@ public class Game : MonoBehaviour {
 		// this way we don't have a bunch of objects in the scene just to represent every single blank cell.
 		// instead, we only store and do calculations on objects that the player can see and interact with.
 
-	// in-world ui 
+	// in-world chrome 
 	// quad positioning and spans
 	const int cellsAcross = 16;
 	Vector3 horiBarCenter;
@@ -118,8 +119,9 @@ public class Game : MonoBehaviour {
 
 	int prevX;
 	int prevY;
-	void Update() { // FIXME: hohoho boy.  first we have screen mouse pos, 
-		// ...................then world position, then quantized world position....all with the same var
+	void Update() { // first we have screen mouse pos, 
+		// ...................then world position, 
+		// ...................then quantized world position (to match the cell grid)
 		mouPos = Input.mousePosition;
 		mouPos.z = 10.0f;
 		mouWorldPos = Camera.main.ScreenToWorldPoint(mouPos);
@@ -230,5 +232,44 @@ public class Game : MonoBehaviour {
 		pastMaxY = new Vector3(0, cellsAcross, 0);
 		stretchX = new Vector3(cellsAcross, 1, 1);
 		stretchY = new Vector3(1, cellsAcross, 1);
+	}
+	
+	string[] mapNames;
+	public void LoadDirectory() {
+		//		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are keys into...
+		//		mapNames = dir.Split(splitSeperator);
+		//		var data = PlayerPrefs.GetString("HighScores");
+		//		if(!string.IsNullOrEmpty(data))	{
+		//			var b = new BinaryFormatter();
+		//			var m = new MemoryStream(Convert.FromBase64String(data));
+		//			highScores = (List<ScoreEntry>)b.Deserialize(m);
+		//		}
+	}
+	
+	public void LoadMap(string name) {
+		//		var data = PlayerPrefs.GetString(mapName);
+		//
+		//		if (!string.IsNullOrEmpty(data)) {
+		//			var b = new BinaryFormatter();
+		//			var m = new MemoryStream(Convert.FromBase64String(data));
+		//			highScores = (List<ScoreEntry>)b.Deserialize(m);
+		//		}
+	}
+	
+	public void SaveMap(string name) { //FIXME: need to check that there isn't already a key/map with that name!
+		Debug.Log("saveMap()");
+
+		// add entry to our directory key (
+		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are keys	into PlayerPrefs
+		if (string.IsNullOrEmpty(dir))
+			dir = name;
+		else 
+			dir += splitSeperator + name;
+		PlayerPrefs.SetString("Directory", dir);
+
+		var bf = new BinaryFormatter();
+		var ms = new MemoryStream();
+		bf.Serialize(ms, cells);
+		PlayerPrefs.SetString(name, Convert.ToBase64String(ms.GetBuffer()));
 	}
 }
