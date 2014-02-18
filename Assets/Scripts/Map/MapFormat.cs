@@ -9,8 +9,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 
 [Serializable]
-public class MapFormatContainer {
-	// lists of strings, of only the types and textures used in this map.
+public class MapFormat {
+	// we have a version of the map for realtime, and a stripped down version
+	// for map saving.  so we don't store all the unneeded (& large) game object
+	// info and such (they will get generated from the tiny map format upon loading)
+
+	// lists of strings.  of only the types and textures used in this map.
 	// the indexes of which are the minimal data stored in each tile.
 	// this allows tiny sizes, & our ability to add to 
 	// our types and texture library while preserving integrity of older maps.
@@ -19,12 +23,6 @@ public class MapFormatContainer {
 	public List<string> Types = new List<string>();
 	public List<string> Pics = new List<string>(); // textures
 	
+	// array of tile lists
 	public List<TileData>[,] Cells = new List<TileData>[S.CellsAcross, S.CellsAcross];
-
-	// .......then the grid of cells 
-	// 		* which are stacks of TileData, which only stores index numbers into those 2 string lists
-
-	// looks like we should have a version of the map for realtime, and a stripped down version
-	//		for map saving.  so we don't store all unneeded game object info  and such
-	// (they will get generated	from the small map format
 }

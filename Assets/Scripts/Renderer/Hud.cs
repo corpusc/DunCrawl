@@ -10,6 +10,7 @@ public class Hud : MonoBehaviour {
 	// private
 	MapEditor mapEditor;
 	ObjectType currType = ObjectType.Floor;
+	string[] mapNames;
 	Vector3 mouPos; 
 	Rect screen;
 	int maxTilesAcross = 20;
@@ -39,9 +40,6 @@ public class Hud : MonoBehaviour {
 			case HudMode.EditPalette:
 				drawTextureChoosingGrid();
 				break;
-//			case HudMode.Playing:
-//				commonChrome();
-//				break;
 //			case HudMode.EditMap:
 //				commonChrome();
 //				break;
@@ -96,11 +94,28 @@ public class Hud : MonoBehaviour {
 					}
 				}else{ // for all other modes, we just switch to that mode
 					Mode = cmi;
+
+					if (Mode == HudMode.LoadMap) {
+						mapNames = mapEditor.LoadDirectory();
+					}
 				}
 			}
 		}
 		GUI.color = Color.white;
 		GUILayout.EndHorizontal();
+
+		if (Mode == HudMode.LoadMap) {
+			// show list of available maps
+			scroll = GUILayout.BeginScrollView(scroll);
+			//GUILayout.BeginVertical();
+			foreach (var s in mapNames) {
+				if (GUILayout.Button(s)) {
+					mapEditor.LoadMap(s);
+				}
+			}
+			//GUILayout.EndVertical();
+			GUILayout.EndScrollView();
+		}
 	}
 
 	Vector2 scroll = Vector2.zero;

@@ -233,20 +233,19 @@ public class MapEditor : MonoBehaviour {
 		stretchY = new Vector3(1, S.CellsAcross, 1);
 	}
 	
-	string[] mapNames;
-	public void LoadDirectory() {
-		//		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are keys into...
-		//		mapNames = dir.Split(splitSeperator);
-		//		var data = PlayerPrefs.GetString("HighScores");
-		//		if(!string.IsNullOrEmpty(data))	{
-		//			var b = new BinaryFormatter();
-		//			var m = new MemoryStream(Convert.FromBase64String(data));
-		//			highScores = (List<ScoreEntry>)b.Deserialize(m);
-		//		}
+	public string[] LoadDirectory() {
+		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are keys into...
+		var mapNames = dir.Split(splitSeperator);
+
+		if (mapNames.Length < 1)
+			mapNames[0] = "No files exist right now!";
+
+		return mapNames;
 	}
 	
 	public void LoadMap(string name) {
-		//		var data = PlayerPrefs.GetString(mapName);
+		Debug.Log("LoadMap(" + name + ")");
+		//		var data = PlayerPrefs.GetString(name);
 		//
 		//		if (!string.IsNullOrEmpty(data)) {
 		//			var b = new BinaryFormatter();
@@ -258,7 +257,7 @@ public class MapEditor : MonoBehaviour {
 	public void SaveMap(string name) { 
 		//FIXME: need to check that there isn't already a key/map with that name!
 		// (to warn about losing existing map if proceeding)
-		Debug.Log("saveMap()");
+		Debug.Log("SaveMap()");
 
 		// add entry to our directory key (
 		var dir = PlayerPrefs.GetString("Directory", ""); // we have to create our own directory of "file" names which are keys	into PlayerPrefs
@@ -269,7 +268,7 @@ public class MapEditor : MonoBehaviour {
 		PlayerPrefs.SetString("Directory", dir);
 
 		// make tiny version of map for saving
-		var mf = new MapFormatContainer();
+		var mf = new MapFormat();
 		for (int y = 0; y < S.CellsAcross; y++) {
 			for (int x = 0; x < S.CellsAcross; x++) {
 				if (cellsRealtime[y,x] != null && 
