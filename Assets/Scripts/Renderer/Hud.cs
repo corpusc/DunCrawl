@@ -111,6 +111,7 @@ public class Hud : MonoBehaviour {
 			foreach (var s in mapNames) {
 				if (GUILayout.Button(s)) {
 					mapEditor.LoadMap(s);
+					Mode = HudMode.EditMap;
 				}
 			}
 			//GUILayout.EndVertical();

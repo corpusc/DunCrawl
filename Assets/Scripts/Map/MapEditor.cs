@@ -134,7 +134,7 @@ public class MapEditor : MonoBehaviour {
 
 			// if just now pressed
 			if (Input.GetMouseButtonDown(0)) {
-				createQuad(mouWorldPos);
+				createQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
 			}
 			if (Input.GetMouseButtonDown(1)) {
 				destroyQuad(mouWorldPos);
@@ -143,7 +143,7 @@ public class MapEditor : MonoBehaviour {
 			if (!(x == prevX && y == prevY)) {
 				// we just moved to a new cell
 				if (Input.GetMouseButton(0))
-					createQuad(mouWorldPos);
+					createQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
 				if (Input.GetMouseButton(1))
 					destroyQuad(mouWorldPos);
 			}
@@ -159,9 +159,12 @@ public class MapEditor : MonoBehaviour {
 		cursorCell.transform.position = mouWorldPos;
 	}
 	
+	void destroyQuad(int x, int y) {
+		destroyQuad(new Vector3(x, y, 0));
+	}
 	void destroyQuad(Vector3 pos) {
 		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
-		
+	
 		if (cl == null || cl.Count < 1)
 			return;
 
@@ -170,9 +173,9 @@ public class MapEditor : MonoBehaviour {
 		Debug.Log("destroyQuad()");
 	}
 		
-	void createQuad(Vector3 pos) {
-		if (hud.Mode != HudMode.EditMap)
-			return;
+	void createQuad(Vector3 pos, ObjectType type, Texture pic) {
+		//if (hud.Mode != HudMode.EditMap)
+			//return;
 
 		bool adding = false;
 		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
@@ -204,8 +207,8 @@ public class MapEditor : MonoBehaviour {
 			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			o.transform.position = pos;
 			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
-			o.renderer.material.mainTexture = hud.BrushPic;
-			td.Type = hud.BrushType;
+			o.renderer.material.mainTexture = pic;
+			td.Type = type;
 			td.GameObject = o;
 			cellsRealtime[(int)pos.y, (int)pos.x].Add(td);
 		}
@@ -255,18 +258,21 @@ public class MapEditor : MonoBehaviour {
 			var ms = new MemoryStream(Convert.FromBase64String(d));
 			var mf = (MapFormat)bf.Deserialize(ms);
 
-			cellsRealtime = new List<TileDataRealtime>[S.CellsAcross, S.CellsAcross];
 			for (int y = 0; y < S.CellsAcross; y++) {
 				for (int x = 0; x < S.CellsAcross; x++) {
+					if (cellsRealtime[y,x] != null && 
+					    cellsRealtime[y,x].Count > 0)
+					{
+						destroyQuad(x, y);
+					}
+
 					if (mf.Cells[y,x] != null && 
 					    mf.Cells[y,x].Count > 0)
 					{
 						foreach (var c in mf.Cells[y,x]) {
-							var rt = new TileDataRealtime();
-							rt.Type = (ObjectType)Enum.Parse(typeof(ObjectType), mf.Types[(int)c.Type]);
-							var pic = Pics.Get("" + rt.Type, mf.Pics[c.Pic]);
-
-							//cellsRealtime[y,x]
+							var t = (ObjectType)Enum.Parse(typeof(ObjectType), mf.Types[(int)c.Type]);
+							var pic = Pics.Get("" + t, mf.Pics[c.Pic]);
+							createQuad(new Vector3(x, y, 0), t, pic);
 						}
 					}
 				}
