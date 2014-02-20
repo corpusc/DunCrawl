@@ -137,7 +137,7 @@ public class MapEditor : MonoBehaviour {
 				createQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
 			}
 			if (Input.GetMouseButtonDown(1)) {
-				destroyQuad(mouWorldPos);
+				destroyOneQuad(mouWorldPos);
 			}
 
 			if (!(x == prevX && y == prevY)) {
@@ -145,7 +145,7 @@ public class MapEditor : MonoBehaviour {
 				if (Input.GetMouseButton(0))
 					createQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
 				if (Input.GetMouseButton(1))
-					destroyQuad(mouWorldPos);
+					destroyOneQuad(mouWorldPos);
 			}
 
 			prevX = x;
@@ -159,10 +159,10 @@ public class MapEditor : MonoBehaviour {
 		cursorCell.transform.position = mouWorldPos;
 	}
 	
-	void destroyQuad(int x, int y) {
-		destroyQuad(new Vector3(x, y, 0));
+	void destroyOneQuad(int x, int y) {
+		destroyOneQuad(new Vector3(x, y, 0));
 	}
-	void destroyQuad(Vector3 pos) {
+	void destroyOneQuad(Vector3 pos) {
 		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
 	
 		if (cl == null || cl.Count < 1)
@@ -260,10 +260,9 @@ public class MapEditor : MonoBehaviour {
 
 			for (int y = 0; y < S.CellsAcross; y++) {
 				for (int x = 0; x < S.CellsAcross; x++) {
-					if (cellsRealtime[y,x] != null && 
-					    cellsRealtime[y,x].Count > 0)
-					{
-						destroyQuad(x, y);
+					if (cellsRealtime[y,x] != null)	{
+						while (cellsRealtime[y,x].Count > 0)
+							destroyOneQuad(x, y);
 					}
 
 					if (mf.Cells[y,x] != null && 
@@ -271,7 +270,9 @@ public class MapEditor : MonoBehaviour {
 					{
 						foreach (var c in mf.Cells[y,x]) {
 							var t = (ObjectType)Enum.Parse(typeof(ObjectType), mf.Types[(int)c.Type]);
+							Debug.Log("t: " + t);
 							var pic = Pics.Get("" + t, mf.Pics[c.Pic]);
+							Debug.Log("mf.Pics[c.Pic]: " + mf.Pics[c.Pic]);
 							createQuad(new Vector3(x, y, 0), t, pic);
 						}
 					}
