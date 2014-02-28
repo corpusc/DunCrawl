@@ -182,32 +182,38 @@ public class MapEditor : MonoBehaviour {
 		if (hud.Mode != HudMode.EditMap)
 			return;
 
-		bool adding = false;
+		// don't make, if user is clicking part of the button strip at top of screen
+		GUIStyle style = "Button";
+		var gc = new GUIContent("Playing");
+		if (mouPos.y >= Screen.height - style.CalcSize(gc).y)
+			return;
+
+		bool addingNewQuad = false;
 		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
 		//Debug.Log("pos.x: " + (int)pos.x + "  pos.y: " + (int)pos.y);
 
 		if (cl == null) {
 			cl = cellsRealtime[(int)pos.y, (int)pos.x] = new List<TileDataRealtime>();
-			Debug.Log("cell was null, made a new list");
+			//Debug.Log("     cell was null, made a new list     ");
 		}
 		
 		if (cl.Count < 1) {
-			adding = true;
-			Debug.Log("cell had empty list");
+			addingNewQuad = true;
+			//Debug.Log("     cell had empty list     ");
 		}
 
 		// replace if brush is the same type as something else in the list
 		for (int i = cl.Count-1; i >= 0; i--) {
-			Debug.Log("at least one PicData here");
+			//Debug.Log("     at least one PicData here     ");
 
 			if (cl[i].Type == hud.BrushType) {
 				Destroy(cl[i].O);
 				cl.RemoveAt(i);
-				adding = true;
+				addingNewQuad = true;
 			}
 		}
 
-		if (adding) {
+		if (addingNewQuad) {
 			var td = new TileDataRealtime();
 			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			o.transform.position = pos;
@@ -236,8 +242,9 @@ public class MapEditor : MonoBehaviour {
 	}
 
 	void setQuadPositioningAndSpans() {
-		horiBarCenter = new Vector3(S.CellsAcross*0.5f-0.5f, 0, 0);
-		vertBarCenter = new Vector3(0, S.CellsAcross*0.5f-0.5f, 0);
+		float f = (S.CellsAcross * 0.5f) - 0.5f;
+		horiBarCenter = new Vector3(f, 0, 0);
+		vertBarCenter = new Vector3(0, f, 0);
 		pastMaxX = new Vector3(S.CellsAcross, 0, 0);
 		pastMaxY = new Vector3(0, S.CellsAcross, 0);
 		stretchX = new Vector3(S.CellsAcross, 1, 1);

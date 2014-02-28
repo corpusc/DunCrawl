@@ -12,10 +12,10 @@ public class Hud : MonoBehaviour {
 		set { 
 			// do this when changing FROM the OLD mode
 			if (mode == HudMode.Playing) {
-				if (//CcPlayer != null &&
-				    Player.O != null) 
-
+				if (Player.O != null) {
 					Player.O.SetActive(false);
+					Debug.Log("making player inactive");
+				}
 			}
 
 			mode = value; 
@@ -23,8 +23,9 @@ public class Hud : MonoBehaviour {
 			// do this when changing TO the NEW mode
 			if (mode == HudMode.Playing) {
 				if (Player.O != null) {
-					Player.O.transform.position = Vector2.zero;// Camera.main.transform.position;
+					Player.O.transform.position = new Vector3(-3f, -3f, -3f);// Camera.main.transform.position;
 					Player.O.SetActive(true);
+					Debug.Log("making player ACTive");
 				}
 			}
 		}
