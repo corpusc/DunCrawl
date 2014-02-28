@@ -5,7 +5,7 @@ using System.Collections;
 
 
 public enum HudMode {
-	//Playing,     don't wanna be a playtease
+	Playing,
 	//Dead,        this shouldn't be choosable, so might as well keep disabled until we have player death
 	EditMap,
 	EditPalette,

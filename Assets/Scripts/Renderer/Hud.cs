@@ -2,10 +2,33 @@
 using System.Collections;
 
 public class Hud : MonoBehaviour {
-	public HudMode Mode = HudMode.EditPalette;
 	public ObjectType BrushType;
 	public Texture BrushPic;
 	public string MapName;
+
+	private HudMode mode = HudMode.EditPalette;
+	public HudMode Mode { 
+		get { return mode; }
+		set { 
+			// do this when changing FROM the OLD mode
+			if (mode == HudMode.Playing) {
+				if (//CcPlayer != null &&
+				    Player.O != null) 
+
+					Player.O.SetActive(false);
+			}
+
+			mode = value; 
+
+			// do this when changing TO the NEW mode
+			if (mode == HudMode.Playing) {
+				if (Player.O != null) {
+					Player.O.transform.position = Vector2.zero;// Camera.main.transform.position;
+					Player.O.SetActive(true);
+				}
+			}
+		}
+	}
 
 	// private
 	MapEditor mapEditor;

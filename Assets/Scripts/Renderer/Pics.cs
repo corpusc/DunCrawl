@@ -44,7 +44,6 @@ public static class Pics {
 	static public Texture Get(ObjectType objectType, int arrIdx) {
 		return (Texture)pics["" + objectType][arrIdx];
 	}
-	
 	static public Texture Get(string type, string name) {
 		foreach (var o in pics[type]) {
 			if (o.name == name)

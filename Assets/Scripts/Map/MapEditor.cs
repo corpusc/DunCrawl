@@ -96,35 +96,40 @@ public class MapEditor : MonoBehaviour {
 	}
 	
 	void FixedUpdate() {
-		// all we do in this method is pan around the dungeon floor (ONLY whewn editing map)
+		// all we do in this method is pan around the dungeon floor (ONLY when editing map)
 		if (hud.Mode != HudMode.EditMap)
 			return;
 
-		float speed = 0.06f;
-		int mar = 16; // margin from edge, where we pan camera
-
-		if (mouPos.x > Screen.width - mar &&
-		    Camera.main.transform.position.x < S.CellsAcross)
-			Camera.main.transform.position += new Vector3(speed, 0, 0);
-		if (mouPos.x < mar &&
-		    Camera.main.transform.position.x > 0)
-			Camera.main.transform.position -= new Vector3(speed, 0, 0);
-		if (mouPos.y > Screen.height - mar &&
-		    Camera.main.transform.position.y < S.CellsAcross)
-			Camera.main.transform.position += new Vector3(0, speed, 0);
-		if (mouPos.y < mar &&
-		    Camera.main.transform.position.y > 0)
-			Camera.main.transform.position -= new Vector3(0, speed, 0);
+//		float speed = 0.06f;
+//		int mar = 16; // margin from edge, where we pan camera
+//
+//		if (mouPos.x > Screen.width - mar &&
+//		    Camera.main.transform.position.x < S.CellsAcross)
+//			Camera.main.transform.position += new Vector3(speed, 0, 0);
+//		if (mouPos.x < mar &&
+//		    Camera.main.transform.position.x > 0)
+//			Camera.main.transform.position -= new Vector3(speed, 0, 0);
+//		if (mouPos.y > Screen.height - mar &&
+//		    Camera.main.transform.position.y < S.CellsAcross)
+//			Camera.main.transform.position += new Vector3(0, speed, 0);
+//		if (mouPos.y < mar &&
+//		    Camera.main.transform.position.y > 0)
+//			Camera.main.transform.position -= new Vector3(0, speed, 0);
 	}
 
 	int prevX;
 	int prevY;
+	Vector3 prevMouPos;
 	void Update() { // first we have screen mouse pos, 
 		// ...................then world position, 
 		// ...................then quantized world position (to match the cell grid)
+		prevMouPos = mouPos;
 		mouPos = Input.mousePosition;
 		mouPos.z = 10.0f;
 		mouWorldPos = Camera.main.ScreenToWorldPoint(mouPos);
+
+		if (Input.GetKey(KeyCode.Mouse2))
+			Camera.main.transform.position -= (mouPos - prevMouPos) / 50f;
 
 		if (scaledUnitSquareContains(mouWorldPos, entireFloor)) {
 			int x = (int)((mouWorldPos.x + 0.5f) / 1f);
@@ -134,7 +139,7 @@ public class MapEditor : MonoBehaviour {
 
 			// if just now pressed
 			if (Input.GetMouseButtonDown(0)) {
-				createQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
+				makeRealtimeQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
 			}
 			if (Input.GetMouseButtonDown(1)) {
 				destroyOneQuad(mouWorldPos);
@@ -143,7 +148,7 @@ public class MapEditor : MonoBehaviour {
 			if (!(x == prevX && y == prevY)) {
 				// we just moved to a new cell
 				if (Input.GetMouseButton(0))
-					createQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
+					makeRealtimeQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
 				if (Input.GetMouseButton(1))
 					destroyOneQuad(mouWorldPos);
 			}
@@ -168,14 +173,14 @@ public class MapEditor : MonoBehaviour {
 		if (cl == null || cl.Count < 1)
 			return;
 
-		Destroy(cl[cl.Count-1].GameObject);
+		Destroy(cl[cl.Count-1].O);
 		cl.RemoveAt(cl.Count-1);
 		Debug.Log("destroyQuad()");
 	}
 		
-	void createQuad(Vector3 pos, ObjectType type, Texture pic) {
-		//if (hud.Mode != HudMode.EditMap)
-			//return;
+	void makeRealtimeQuad(Vector3 pos, ObjectType type, Texture pic) {
+		if (hud.Mode != HudMode.EditMap)
+			return;
 
 		bool adding = false;
 		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
@@ -196,7 +201,7 @@ public class MapEditor : MonoBehaviour {
 			Debug.Log("at least one PicData here");
 
 			if (cl[i].Type == hud.BrushType) {
-				Destroy(cl[i].GameObject);
+				Destroy(cl[i].O);
 				cl.RemoveAt(i);
 				adding = true;
 			}
@@ -208,8 +213,11 @@ public class MapEditor : MonoBehaviour {
 			o.transform.position = pos;
 			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
 			o.renderer.material.mainTexture = pic;
+			if (type == ObjectType.Wall) {
+				var rb = o.AddComponent<Rigidbody2D>();
+			}
 			td.Type = type;
-			td.GameObject = o;
+			td.O = o;
 			cellsRealtime[(int)pos.y, (int)pos.x].Add(td);
 		}
 	}
@@ -273,7 +281,7 @@ public class MapEditor : MonoBehaviour {
 							Debug.Log("t: " + t);
 							var pic = Pics.Get("" + t, mf.Pics[c.Pic]);
 							Debug.Log("mf.Pics[c.Pic]: " + mf.Pics[c.Pic]);
-							createQuad(new Vector3(x, y, 0), t, pic);
+							makeRealtimeQuad(new Vector3(x, y, 0), t, pic);
 						}
 					}
 				}
@@ -304,7 +312,7 @@ public class MapEditor : MonoBehaviour {
 					mf.Cells[y,x] = new List<TileData>();
 
 					foreach (var rt in cellsRealtime[y,x]) {
-						var picName = rt.GameObject.renderer.material.mainTexture.name;
+						var picName = rt.O.renderer.material.mainTexture.name;
 						int ti = mf.Types.IndexOf("" + rt.Type); // type index
 						int pi = mf.Pics.IndexOf(picName);   // pic index
 
