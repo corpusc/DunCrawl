@@ -118,12 +118,17 @@ public class MapEditor : MonoBehaviour {
 	void Update() { // first we have screen mouse pos, 
 		// ...................then world position, 
 		// ...................then quantized world position (to match the cell grid)
-		prevMouPos = mouPos;
-		mouPos = Input.mousePosition;
+		if (Input.GetMouseButtonDown(2)) {
+			prevMouPos = mouPos = Input.mousePosition;
+		}else{
+		    prevMouPos = mouPos;
+			mouPos = Input.mousePosition;
+		}
+	    
 		mouPos.z = 0.4f;//10.0f;
 		mouWorldPos = Camera.main.ScreenToWorldPoint(mouPos);
 
-		if (Input.GetKey(KeyCode.Mouse2))
+		if (Input.GetMouseButton(2))
 			Camera.main.transform.position -= (mouPos - prevMouPos) / 50f;
 
 		if (scaledUnitSquareContains(mouWorldPos, entireFloor)) {
