@@ -215,7 +215,7 @@ public class MapEditor : MonoBehaviour {
 			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			o.transform.parent = entireFloor.transform;
 			o.transform.position = pos;
-			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
+			//o.renderer.material.shader = Shader.Find("Unlit/Transparent");
 			o.renderer.material.mainTexture = pic;
 			if (type == ObjectType.Wall) {
 				var rb = o.AddComponent<Rigidbody2D>();
