@@ -44,55 +44,50 @@ public class MapEditor : MonoBehaviour {
 		cursBad = Pics.GetFirstWith("cursor_red");
 		var bumpLeft = new Vector3(-1, 0, 0);
 		var bumpDown = new Vector3(0, -1, 0);
-		var farBack = new Vector3(0, 0, 30);
+		var farBack = new Vector3(0, 0, 1.5f);
+		var near = new Vector3(0, 0, 0.1f);
 
 		setQuadPositioningAndSpans();
 		Camera.main.transform.position = new Vector3(S.CellsAcross/2, S.CellsAcross/2, 0); // put in the middle of floor
 
 		// make the boundaries of the floor
-		// top edge
 		var v = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		v.name = "Boundary Top";
 		v.transform.position = farBack + horiBarCenter + pastMaxY;
 		v.transform.localScale = stretchX;
-		//Debug.Log ("top edge - transform.position: " + transform.position);
-		v.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		v.renderer.material.mainTexture = Pics.GetFirstWith("cursor_green");
+		picSetting(v, "cursor_green");
 		
-		// bottom edge
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		v.name = "Boundary Bottom";
 		v.transform.position = farBack + horiBarCenter + bumpDown;
 		v.transform.localScale = stretchX;
-		v.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		v.renderer.material.mainTexture = Pics.GetFirstWith("cursor_green");
-		//Debug.Log ("bottom edge - transform.position: " + transform.position);
+		picSetting(v, "cursor_green");
 
-		// left edge
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		v.name = "Boundary Left";
 		v.transform.position = farBack + vertBarCenter + bumpLeft;
 		v.transform.localScale = stretchY;
-		v.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		v.renderer.material.mainTexture = Pics.GetFirstWith("cursor_green");
-		
-		// right edge
+		picSetting(v, "cursor_green");
+
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		v.name = "Boundary Right";
 		v.transform.position = farBack + vertBarCenter + pastMaxX;
 		v.transform.localScale = stretchY;
-		v.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		v.renderer.material.mainTexture = Pics.GetFirstWith("cursor_green");
-	
+		picSetting(v, "cursor_green");
+
 
 		
-		// the backdrop of valid floor space
 		entireFloor = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		entireFloor.name = "Map Chunk Backdrop";
 		entireFloor.transform.position = farBack + horiBarCenter + vertBarCenter;
 		entireFloor.transform.localScale = Vector3.Scale(stretchX, stretchY);
-		entireFloor.renderer.material.shader = Shader.Find("Unlit/Transparent");
+		picSetting(entireFloor, "cursor_green");
 		entireFloor.renderer.material.mainTexture = Pics.Black;
 		
-		// cursor
 		cursorCell = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		cursorCell.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		cursorCell.renderer.material.mainTexture = Pics.GetFirstWith("cursor");
+		cursorCell.name = "Cursor";
+		cursorCell.transform.position = near;
+		picSetting(cursorCell, "cursor");
 	}
 	
 	void FixedUpdate() {
@@ -125,7 +120,7 @@ public class MapEditor : MonoBehaviour {
 		// ...................then quantized world position (to match the cell grid)
 		prevMouPos = mouPos;
 		mouPos = Input.mousePosition;
-		mouPos.z = 10.0f;
+		mouPos.z = 0.4f;//10.0f;
 		mouWorldPos = Camera.main.ScreenToWorldPoint(mouPos);
 
 		if (Input.GetKey(KeyCode.Mouse2))
@@ -182,6 +177,8 @@ public class MapEditor : MonoBehaviour {
 		if (hud.Mode != HudMode.EditMap)
 			return;
 
+		pos.z = 1f;
+
 		// don't make, if user is clicking part of the button strip at top of screen
 		GUIStyle style = "Button";
 		var gc = new GUIContent("Playing");
@@ -216,6 +213,7 @@ public class MapEditor : MonoBehaviour {
 		if (addingNewQuad) {
 			var td = new TileDataRealtime();
 			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
+			o.transform.parent = entireFloor.transform;
 			o.transform.position = pos;
 			o.renderer.material.shader = Shader.Find("Unlit/Transparent");
 			o.renderer.material.mainTexture = pic;
@@ -355,5 +353,10 @@ public class MapEditor : MonoBehaviour {
 		}else{
 			return null;
 		}
+	}
+	
+	void picSetting(GameObject o, string s) {
+		//o.renderer.material.shader = Shader.Find("Unlit/Transparent");
+		o.renderer.material.mainTexture = Pics.GetFirstWith(s);
 	}
 }

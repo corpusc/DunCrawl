@@ -23,7 +23,7 @@ public class Hud : MonoBehaviour {
 			// do this when changing TO the NEW mode
 			if (mode == HudMode.Playing) {
 				if (Player.O != null) {
-					Player.O.transform.position = new Vector3(-3f, -3f, -3f);// Camera.main.transform.position;
+					Player.O.transform.position = new Vector3(4f, 4f, 0.35f);// Camera.main.transform.position;
 					Player.O.SetActive(true);
 					Debug.Log("making player ACTive");
 				}
