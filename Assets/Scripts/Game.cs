@@ -7,7 +7,7 @@ public class Game : MonoBehaviour {
 		Player.O = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		Player.O.name = "Player";
 		//Player.O.renderer.material.shader = Shader.Find("Unlit/Transparent");
-		Player.O.renderer.material.mainTexture = Pics.Get("Icon", "cursor_green");
+		Player.O.renderer.material.mainTexture = Pics.Get("Icon", "deep_elf_mage");
 		Player.O.AddComponent<Rigidbody2D>();
 	}
 	

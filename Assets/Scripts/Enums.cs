@@ -12,7 +12,7 @@ public enum HudMode {
 	SaveMap,
 	LoadMap,
 	
-	Count // used for iterating thru these types
+	Count // used for iterating thru these
 };
 
 public enum ObjectType {
@@ -23,5 +23,5 @@ public enum ObjectType {
 	Monster,
 	Wall,
 
-	Count // used for iterating thru these types
+	Count // used for iterating thru these
 };
