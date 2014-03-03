@@ -7,13 +7,11 @@ using UnityEngine;
 public class Bat : EnemyEntity {
 	static readonly Rect[] BatRect = new Rect[] { new Rect(0 * 16, 4 * 16, 16, 16), new Rect(1 * 16, 4 * 16, 16, 16) };
 
-	public Bat(Vector2 position, Player player)
-	    : base(screenManager, position, player)
-	{
+	public Bat(Vector2 position) : base(position) {
 	    collisionOffsetX = 4 * 2;
 	    collisionOffsetY = 5 * 2;
-	    collisionBox.x = (int)position.X + collisionOffsetX;
-	    collisionBox.y = (int)position.Y + collisionOffsetY;
+	    collisionBox.x = (int)position.x + collisionOffsetX;
+		collisionBox.y = (int)position.y + collisionOffsetY;
 	    collisionBox.width = 16;
 	    collisionBox.height = 12;
 	    currentSourceRect = BatRect;
@@ -30,9 +28,8 @@ public class Bat : EnemyEntity {
 	    base.updateHorizontal(dt);
 
 	    // ai stuff
-	    if (currentState == State.Neutral)
-	    {
-	        velocity = player.Position - position;
+	    if (currentState == State.Neutral) {
+	        velocity = Player.Pos2D - position;
 	        velocity.Normalize();
 	        velocity *= maxSpeed;
 	    }           
@@ -67,6 +64,6 @@ public class Bat : EnemyEntity {
 
 	public override void onDie() {
 	    base.onDie();
-	    parentRoom.addEnemy(new EnemyExplosion(screenManager, position, parentRoom, player, spriteSheet));
+	    //parentRoom.addEnemy(new EnemyExplosion(screenManager, position, parentRoom, player, spriteSheet));
 	}
 }

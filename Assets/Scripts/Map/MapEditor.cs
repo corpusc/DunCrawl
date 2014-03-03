@@ -360,8 +360,8 @@ public class MapEditor : MonoBehaviour {
 		}
 	}
 	
-	void picSetting(GameObject o, string s) {
-		//o.renderer.material.shader = Shader.Find("Unlit/Transparent");
+	void picSetting(GameObject o, string s, string shader = "Unlit/Transparent") {
+		o.renderer.material.shader = Shader.Find(shader);
 		o.renderer.material.mainTexture = Pics.GetFirstWith(s);
 	}
 }

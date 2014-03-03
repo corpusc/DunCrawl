@@ -12,16 +12,11 @@ public class Projectile : EnemyEntity {
 	float yOffsetSpeed = -0.9f;
 	float yOffsetGravity = 0.01f;
 
-	public Projectile(
-		Vector2 position, 
-		Player player, 
-		Texture2D spriteSheet)
-	    : base(position, player)
-	{
+	public Projectile(Vector2 position) : base(position)	{
 	    collisionOffsetX = 5 * 2;
 	    collisionOffsetY = 6 * 2;
-	    collisionBox.x = (int)position.X + collisionOffsetX;
-	    collisionBox.y = (int)position.Y + collisionOffsetY;
+	    collisionBox.x = (int)position.x + collisionOffsetX;
+	    collisionBox.y = (int)position.y + collisionOffsetY;
 	    collisionBox.width = 6 * 2;
 	    collisionBox.height = 5 * 2;
 	    currentSourceRect = SlimeProjectileShadowRect;
@@ -29,7 +24,7 @@ public class Projectile : EnemyEntity {
 	    animCount = 2;
 	    animSpeed = 0.2f;
 
-	    velocity = player.Position - position;
+		velocity = Player.Pos2D - position;
 	    velocity.Normalize();
 	    velocity *= 1.5f;
 
@@ -37,7 +32,6 @@ public class Projectile : EnemyEntity {
 	    attackRect.width = collisionBox.width;
 	    attackRect.height = collisionBox.height;
 
-	    this.spriteSheet = spriteSheet;
 	    countTowardsEnemyCount = false;
 	    health = 1;
 	}
@@ -46,7 +40,7 @@ public class Projectile : EnemyEntity {
 	    base.updateHorizontal(dt);
 	    attackRect.x = collisionBox.x;
 
-	    if (Math.Abs(velocity.X * velocity.X + velocity.Y * velocity.Y) <= 0.000001f)
+	    if (Math.Abs(velocity.x * velocity.x + velocity.y * velocity.y) <= 0.000001f)
 	        return;
 
 	    animTimer += animSpeed * dt;
@@ -64,25 +58,23 @@ public class Projectile : EnemyEntity {
 	    yOffsetSpeed += yOffsetGravity * dt;
 	    yOffset += yOffsetSpeed * dt;
 
-	    if (yOffset > 0f)
-	    {
-	        parentRoom.removeEnemy(this);
+	    if (yOffset > 0f) {
+			// FIXME parentRoom.removeEnemy(this);
 	    }
 	}
 
 	public override void onCollision(int pushX, int pushY) {
-	    parentRoom.removeEnemy(this);
+	    // FIXME parentRoom.removeEnemy(this);
 	}
 
 	public override void draw() {
 	    base.draw();
 
-	    SpriteBatch spriteBatch = screenManager.SpriteBatch;
-	    spriteRect.x = (int)position.X;
-	    spriteRect.y = (int)(position.Y + yOffset);
-	    spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, parentRoom.TransitionMatrix);
-	    spriteBatch.Draw(spriteSheet, spriteRect.getScaled(scale), SlimeProjectileRect[currentAnim], Color.White);
-	    spriteBatch.End();
+	    spriteRect.x = (int)position.x;
+	    spriteRect.y = (int)(position.y + yOffset);
+	    //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, parentRoom.TransitionMatrix);
+	    //spriteBatch.Draw(spriteSheet, spriteRect.getScaled(scale), SlimeProjectileRect[currentAnim], Color.White);
+	    //spriteBatch.End();
 	}
 
 	public override void handleInput() {

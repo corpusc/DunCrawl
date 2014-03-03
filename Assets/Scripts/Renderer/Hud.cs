@@ -14,7 +14,7 @@ public class Hud : MonoBehaviour {
 			if (mode == HudMode.Playing) {
 				if (Player.O != null) {
 					Player.O.SetActive(false);
-					Debug.Log("making player inactive");
+					Debug.Log("making player INactive");
 				}
 			}
 
@@ -23,7 +23,9 @@ public class Hud : MonoBehaviour {
 			// do this when changing TO the NEW mode
 			if (mode == HudMode.Playing) {
 				if (Player.O != null) {
-					Player.O.transform.position = new Vector3(4f, 4f, 0.35f);// Camera.main.transform.position;
+					var v = Camera.main.transform.position;
+					v.z = 0.35f;
+					Player.O.transform.position = v;
 					Player.O.SetActive(true);
 					Debug.Log("making player ACTive");
 				}
@@ -42,13 +44,17 @@ public class Hud : MonoBehaviour {
 	Color highlighted = Color.magenta;
 	Color editBox = Color.magenta;
 	string defaultEditBox = "Type name here";
+	Texture panView;
+	Texture mousePic;
 
 
 
 	void Start() {
 		MapName = defaultEditBox;
 		BrushType = currType;
-		BrushPic = Pics.GetFirstWith("tab_unselected");
+		BrushPic = Pics.GetFirstWith("brick");
+		panView = Pics.GetFirstWith("PanView");
+		mousePic = Pics.GetFirstWith("MouseWithWheel");
 		mapEditor = GetComponent<MapEditor>();
 	}
 
@@ -80,12 +86,18 @@ public class Hud : MonoBehaviour {
 		
 		// draw ERASE graphic, then BRUSH graphic.... in bottom right corner
 		int ds = span*2; // double span
-		var r = new Rect(Screen.width-ds-20/*past scrollbar*/, Screen.height-ds, ds, ds);
+		int mar = span / 4; // margin around texture graphic
+		int mouW = ds*3 + mar*6; // mouse width
+		var r = new Rect(Screen.width-mouW, Screen.height-ds*2, 
+		                              mouW, ds*2);
+		GUI.DrawTextureWithTexCoords(r, mousePic, new Rect(0f, 0.6666f, 1f, 0.3333f));
+
+		r = new Rect(Screen.width-ds-mar, Screen.height-ds, ds, ds);
 		GUI.DrawTexture(r, Pics.Black);
-		GUI.Label(r, "RMB");
-		r.x -= ds;
+		r.x -= ds+mar*2;
+		GUI.DrawTexture(r, panView);
+		r.x -= ds+mar*2;
 		GUI.DrawTexture(r, BrushPic);
-		GUI.Label(r, "LMB");
 	}
 
 	void mainMenu() {

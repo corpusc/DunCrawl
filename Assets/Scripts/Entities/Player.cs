@@ -4,6 +4,13 @@ using System.Collections;
 public static class Player {
 	public static GameObject O;
 
+	public static Vector2 Pos2D {
+		get {
+			return new Vector2(Player.O.transform.position.x, 
+			                   Player.O.transform.position.y);
+		}
+	}
+
 	public static void Update() {
 		if (O == null)
 			return;

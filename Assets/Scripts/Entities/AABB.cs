@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 
@@ -82,7 +83,7 @@ public struct AABB {
 	}
 	
 	public Rect getScaled(Vector2 scale) {
-		return new Rectangle((int)((float)x * scale.x), (int)((float)y * scale.Y), (int)((float)width * scale.x), (int)((float)height * scale.y));
+		return new Rect((int)((float)x * scale.x), (int)((float)y * scale.y), (int)((float)width * scale.x), (int)((float)height * scale.y));
 	}
 	
 	public bool isEmpty() {

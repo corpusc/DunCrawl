@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -7,19 +6,18 @@ using UnityEngine;
 	public class Boss : EnemyEntity {
         static readonly Rect[] BossHead = new Rect[] { new Rect(9 * 16, 7 * 16, 16, 16), new Rect(3 * 16, 8 * 16, 16, 16) };
         static readonly Rect[] BossBody = new Rect[] { new Rect(6 * 16, 7 * 16, 16, 16), new Rect(7 * 16, 7 * 16, 16, 16), 
-			new Rect(8 * 16, 7 * 16, 16, 16), new Rectangle(6 * 16, 7 * 16, 16, 16) };
+			new Rect(8 * 16, 7 * 16, 16, 16), new Rect(6 * 16, 7 * 16, 16, 16) };
         static readonly Rect[] BossArms = new Rect[] { new Rect(5 * 16, 8 * 16, 16, 16), new Rect(6 * 16, 8 * 16, 16, 16), 
 			new Rect(7 * 16, 8 * 16, 16, 16) };
 
         BossArm leftArm, rightArm;
 
-        public Boss(Vector2 position, Player player, int level)
-            : base(screenManager, position, parentRoom, player)
+        public Boss(Vector2 position, int level) : base(position)
         {
             collisionOffsetX = 0;
             collisionOffsetY = 0;
-            collisionBox.x = (int)position.X + collisionOffsetX;
-            collisionBox.y = (int)position.Y + collisionOffsetY;
+            collisionBox.x = (int)position.x + collisionOffsetX;
+			collisionBox.y = (int)position.y + collisionOffsetY;
             collisionBox.width = 32;
             collisionBox.height = 32;
             currentSourceRect = BossBody;
@@ -32,17 +30,17 @@ using UnityEngine;
             maxSpeed = 1.1f;
             //invincibleCountdownSpeed = -0.02f;
 
-            if (screenManager.RNG.Next(100) < 50)
-                velocity.X = maxSpeed;
+            if (Random.value < 0.5f)
+                velocity.x = maxSpeed;
             else
-                velocity.X = -maxSpeed;
+                velocity.x = -maxSpeed;
 
             this.level = level;
 
-            leftArm = new BossArm(screenManager, position, parentRoom, player, level, true);
-            rightArm = new BossArm(screenManager, position, parentRoom, player, level, false);
-            parentRoom.addEnemy(leftArm);
-            parentRoom.addEnemy(rightArm);
+            leftArm = new BossArm(position, level, true);
+            rightArm = new BossArm(position, level, false);
+            //parentRoom.addEnemy(leftArm);
+            //parentRoom.addEnemy(rightArm);
         }
 
         float timer = 0.0f;
@@ -67,8 +65,8 @@ using UnityEngine;
             if (currentState == State.Neutral) {
                 shootTimer += timerSpeed * dt;
                 if (shootTimer >= 1f && level >= 3) {
-                    BossProjectile projectile = new BossProjectile(screenManager, position, parentRoom, player, screenManager.SpriteSheet);
-                    parentRoom.addEnemy(projectile);
+                    BossProjectile projectile = new BossProjectile(position);
+                    // FIXME parentRoom.addEnemy(projectile);
                     shootTimer = 0f;
                 }
 
@@ -77,18 +75,20 @@ using UnityEngine;
                 if (timer >= 1f) {
                     if (!bothAttacked)
                     {
-                        if (!leftArm.isAttacking)
+                        if /**/ (!leftArm.isAttacking)
                             leftArm.doAttack();
                         else if (!rightArm.isAttacking)
                             rightArm.doAttack();
                         else
                             bothAttacked = true;
-                        velocity = Vector2.Zero;
+
+                        velocity = Vector2.zero;
                     }else if(!leftArm.isAttacking && !rightArm.isAttacking) {
-                        if (screenManager.RNG.Next(100) < 50)
-                            velocity.X = maxSpeed;
+                        if (Random.value < 0.5f)
+                            velocity.x = maxSpeed;
                         else
-                            velocity.X = -maxSpeed;
+                            velocity.x = -maxSpeed;
+
                         bothAttacked = false;
                     }
 
@@ -108,19 +108,18 @@ using UnityEngine;
         }
 
         public override void draw() {
-            base.draw(gameTime);
+			base.draw();
 
-            SpriteBatch spriteBatch = screenManager.SpriteBatch;
-            spriteRect.x = (int)position.X;
-            spriteRect.y = (int)position.Y - 8;
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, parentRoom.TransitionMatrix);
-            Color color = Color.White;
+            spriteRect.x = (int)position.x;
+			spriteRect.y = (int)position.y - 8;
+            //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, parentRoom.TransitionMatrix);
+            Color color = Color.white;
             if (IsInvincible) {
                 if (invincibleAlternate)
-                    color.A = 128;
+					;//color.A = 128;
             }
-            spriteBatch.Draw(screenManager.SpriteSheet, spriteRect.getScaled(scale), BossHead[headAnim], color);
-            spriteBatch.End();
+//            spriteBatch.Draw(screenManager.SpriteSheet, spriteRect.getScaled(scale), BossHead[headAnim], color);
+//            spriteBatch.End();
         }
 
         public override void handleInput() {
@@ -137,7 +136,7 @@ using UnityEngine;
             base.onCollision(pushX, pushY);
 
             if (pushX != 0) {
-                velocity.X = -velocity.X;
+                velocity.x = -velocity.x;
             }
         }
 
@@ -145,6 +144,6 @@ using UnityEngine;
             base.onDie();
             leftArm.onDie();
             rightArm.onDie();
-            parentRoom.addEnemy(new EnemyExplosion(screenManager, position, parentRoom, player, spriteSheet));
+            //parentRoom.addEnemy(new EnemyExplosion(position, spriteSheet));
         }
     }

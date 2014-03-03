@@ -8,8 +8,6 @@ public abstract class AnimatableEntity : CollidableEntity {
 	protected float animTimer = 0f;
 	protected float animSpeed = 0.1f;
 
-	public AnimatableEntity()
-	    : base()
-	{
+	public AnimatableEntity() : base() {
 	}
 }

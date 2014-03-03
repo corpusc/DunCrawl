@@ -5,8 +5,7 @@ using UnityEngine;
 
 
 public abstract class EnemyEntity : AnimatableEntity {
-	protected Texture2D spriteSheet;
-	protected PlayerMinimalisticDungeonCrawler player;
+	//protected PlayerMINIMAL player;
 	protected float maxSpeed = 2.5f;
 
 	protected int health = 2;
@@ -18,13 +17,36 @@ public abstract class EnemyEntity : AnimatableEntity {
 	protected float invincibleAlternateTimer = 0f;
 	protected readonly float invincibleAlternateTimerSpeed = 0.15f;
 
-	protected Vector2 knockbackFriction = Vector2.Zero;
+	protected Vector2 knockbackFriction = Vector2.zero;
 	protected readonly float knockbackFrictionSpeed = 0.1f;
 	protected float knockbackTimer = 0f;
 	protected readonly float knockbackTimerSpeed = 0.03f;
 
+	protected Rect[] currentSourceRect;
+	protected State currentState = State.Neutral;
+	protected float invincibleTimer = 0f;
+	protected float invincibleCountdownSpeed = -0.01f;
+	
 	protected bool isHittable = true;
 	protected bool isHurtingOnContact = false;
+
+	protected enum State {
+		Neutral,
+		Attacking,
+		Knockback
+	}
+	
+	public EnemyEntity(Vector2 position)
+		: base()
+	{
+		this.position = position;
+		spriteRect.x = 0;
+		spriteRect.y = 0;
+		spriteRect.width = 32;
+		spriteRect.height = 32;
+		
+		//this.parentRoom = parentRoom;
+	}
 
 	public bool IsHittable {
 	    get { return isHittable; }
@@ -46,9 +68,9 @@ public abstract class EnemyEntity : AnimatableEntity {
 	        }
 
 	        health = value;
+
 	        if (health > maxHealth)
 	            health = maxHealth;
-
 	        /*if (health <= 0 && this != player) {
 	            parentRoom.removeEnemy(this);
 	        }*/
@@ -74,19 +96,6 @@ public abstract class EnemyEntity : AnimatableEntity {
 	    set { maxSpeed = value; }
 	}
 
-	protected Rect[] currentSourceRect;
-
-	protected float invincibleTimer = 0f;
-	protected float invincibleCountdownSpeed = -0.01f;
-
-	protected enum State {
-	    Neutral,
-	    Attacking,
-	    Knockback
-	}
-
-	protected State currentState = State.Neutral;
-
 	public bool IsInvincible {
 	    get { return invincibleTimer > 0f; }
 	}
@@ -100,22 +109,9 @@ public abstract class EnemyEntity : AnimatableEntity {
 	    get { return attackRect; }
 	}
 
-	public EnemyEntity(Vector2 position, Player player)
-	    : base()
-	{
-	    this.position = position;
-	    spriteRect.x = 0;
-	    spriteRect.y = 0;
-	    spriteRect.width = 32;
-	    spriteRect.height = 32;
-
-	    this.parentRoom = parentRoom;
-	    this.player = player;
-	}
-
 	public override void updateHorizontal(float dt) {
 	    if (currentState == State.Knockback) {
-	        velocity.X += knockbackFriction.X * dt;
+	        velocity.x += knockbackFriction.x * dt;
 	    }
 
 	    base.updateHorizontal(dt);
@@ -123,8 +119,8 @@ public abstract class EnemyEntity : AnimatableEntity {
 	    if (invincibleTimer > 0f) {
 	        invincibleTimer += invincibleCountdownSpeed * dt;
 	        invincibleAlternateTimer += invincibleAlternateTimerSpeed * dt;
-	        if (invincibleAlternateTimer >= 1f)
-	        {
+
+	        if (invincibleAlternateTimer >= 1f) {
 	            invincibleAlternateTimer = 0f;
 	            invincibleAlternate = !invincibleAlternate;
 	        }
@@ -136,7 +132,7 @@ public abstract class EnemyEntity : AnimatableEntity {
 
 	public override void updateVertical(float dt) {
 	    if (currentState == State.Knockback) {
-	        velocity.Y += knockbackFriction.Y * dt;
+			velocity.y += knockbackFriction.y * dt;
 
 	        knockbackTimer += knockbackTimerSpeed * dt;
 	        if (knockbackTimer >= 1f) {
@@ -153,25 +149,24 @@ public abstract class EnemyEntity : AnimatableEntity {
 	}
 
 	public override void draw() {
-	    SpriteBatch spriteBatch = screenManager.SpriteBatch;
-	    spriteRect.x = (int)position.X;
-	    spriteRect.y = (int)position.Y;
-	    spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, parentRoom.TransitionMatrix);
-	    Color color = Color.White;
+	    spriteRect.x = (int)position.x;
+		spriteRect.y = (int)position.y;
+	    //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, parentRoom.TransitionMatrix);
 	    
+		//Color color = Color.white;	    
 		if (IsInvincible) {
 	        if (invincibleAlternate)
-	            color.A = 128;
+				;//color.A = 128;
 	    }
 
-	    spriteBatch.Draw(screenManager.SpriteSheet, spriteRect.getScaled(scale), currentSourceRect[currentAnim], color);
-	    spriteBatch.End();
+	    //spriteBatch.Draw(screenManager.SpriteSheet, spriteRect.getScaled(scale), currentSourceRect[currentAnim], color);
+	    //spriteBatch.End();
 	}
 
-	virtual public void setKnockback(Vector2 velocity) {
+	virtual public void setKnockback(Vector2 veloc) {
 	    currentState = State.Knockback;
-	    this.velocity = velocity;
-	    knockbackFriction = -velocity;
+	    this.velocity = veloc;
+	    knockbackFriction = -veloc;
 	    knockbackFriction.Normalize();
 	    knockbackFriction *= knockbackFrictionSpeed;
 	    knockbackTimer = 0f;

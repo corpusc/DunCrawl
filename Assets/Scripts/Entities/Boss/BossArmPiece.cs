@@ -7,13 +7,13 @@ using UnityEngine;
 	public class BossArmPiece : EnemyEntity {
 		static readonly Rect[] BossArmPieceSource = new Rect[] { new Rect(5 * 16, 8 * 16, 16, 16) };
 
-        public BossArmPiece(Vector2 position, Player player)
-            : base(position, parentRoom, player)
+        public BossArmPiece(Vector2 position)
+            : base(position)
         {
             collisionOffsetX = 0;
             collisionOffsetY = 0;
-            collisionBox.x = (int)position.X + collisionOffsetX;
-            collisionBox.y = (int)position.Y + collisionOffsetY;
+            collisionBox.x = (int)position.x + collisionOffsetX;
+            collisionBox.y = (int)position.y + collisionOffsetY;
             collisionBox.width = 12;
             collisionBox.height = 12;
             currentSourceRect = BossArmPieceSource;
@@ -55,9 +55,8 @@ using UnityEngine;
         {
         }
 
-        public override void onDie()
-        {
+        public override void onDie() {
             base.onDie();
-            parentRoom.addEnemy(new EnemyExplosion(screenManager, position, parentRoom, player, spriteSheet));
+            //parentRoom.addEnemy(new EnemyExplosion(position, spriteSheet));
         }
     }

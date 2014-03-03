@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -11,13 +10,13 @@ public class Slime : EnemyEntity {
 	float timerSpeed = 0.01f;
 	bool shoot = true;
 
-	public Slime(Vector2 position, Player player )
-	    : base(position, parentRoom, player)
+	public Slime(Vector2 position)
+	    : base(position)
 	{
 	    collisionOffsetX = 4 * 2;
 	    collisionOffsetY = 5 * 2;
-	    collisionBox.x = (int)position.X + collisionOffsetX;
-	    collisionBox.y = (int)position.Y + collisionOffsetY;
+	    collisionBox.x = (int)position.x + collisionOffsetX;
+	    collisionBox.y = (int)position.y + collisionOffsetY;
 	    collisionBox.width = 16;
 	    collisionBox.height = 12;
 	    currentSourceRect = SlimeRect;
@@ -26,7 +25,7 @@ public class Slime : EnemyEntity {
 	    animSpeed = 0.02f;
 	    isHurtingOnContact = true;
 
-	    timer = (float)screenManager.RNG.NextDouble();
+	    timer = Random.value;
 	}
 
 	public override void updateHorizontal(float dt) {
@@ -35,20 +34,20 @@ public class Slime : EnemyEntity {
 	    // ai stuff
 	    if (currentState == State.Neutral) {
 	        if (!shoot) {
-	            velocity = player.Position - position;
+				velocity = Player.Pos2D - position;
 	            velocity.Normalize();
 	            velocity *= 0.3f;
 	        }
 	        else
-	            velocity = Vector2.Zero;
+	            velocity = Vector2.zero;
 
 	        timer += timerSpeed * dt;
 	        if ((timer >= 1f && !shoot) || (timer >= 0.3f && shoot)) {
 	            timer = 0f;
 
 	            if (shoot) {
-	                Projectile proj = new Projectile(screenManager, position, parentRoom, player, spriteSheet);
-	                parentRoom.addEnemy(proj);
+	                Projectile proj = new Projectile(position);
+	                // FIXME parentRoom.addEnemy(proj);
 	            }
 
 	            shoot = !shoot;
@@ -74,6 +73,6 @@ public class Slime : EnemyEntity {
 
 	public override void onDie() {
 	    base.onDie();
-	    parentRoom.addEnemy(new EnemyExplosion(screenManager, position, parentRoom, player, spriteSheet));
+		// FIXME parentRoom.addEnemy(new EnemyExplosion(position));
 	}
 }
