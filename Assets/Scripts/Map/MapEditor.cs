@@ -223,7 +223,10 @@ public class MapEditor : MonoBehaviour {
 			//o.renderer.material.shader = Shader.Find("Unlit/Transparent");
 			o.renderer.material.mainTexture = pic;
 			if (type == ObjectType.Wall) {
-				var rb = o.AddComponent<Rigidbody2D>();
+				var po = new GameObject();
+				po.transform.parent = entireFloor.transform;
+				po.transform.position = pos;
+				po.AddComponent<BoxCollider2D>();
 			}
 			td.Type = type;
 			td.O = o;

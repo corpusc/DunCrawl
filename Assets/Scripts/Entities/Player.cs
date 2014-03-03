@@ -15,7 +15,7 @@ public static class Player {
 		if (O == null)
 			return;
 
-		float speed = 0.01f;
+		float speed = 12.01f;
 
 		if (Input.GetKey(KeyCode.A)) {
 			O.rigidbody2D.AddForce(new Vector2(-speed, 0f));
