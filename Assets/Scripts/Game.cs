@@ -4,7 +4,6 @@ using System.Collections;
 public class Game : MonoBehaviour {
 	void Start() {
 		//Player.O = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		Player.O = GameObject.Find("PlayerSprite");
 		//Player.O.name = "Player";
 		//Player.O.renderer.material.shader = Shader.Find("Unlit/Transparent");
 		//Player.O.renderer.material.mainTexture = Pics.Get("Monster", "deep_elf_mage");

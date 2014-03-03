@@ -35,7 +35,7 @@ public class Hud : MonoBehaviour {
 
 	// private
 	MapEditor mapEditor;
-	ObjectType currType = ObjectType.Floor;
+	ObjectType currType = ObjectType.Wall;
 	string[] mapNames;
 	Vector3 mouPos; 
 	Rect screen;
@@ -52,7 +52,7 @@ public class Hud : MonoBehaviour {
 	void Start() {
 		MapName = defaultEditBox;
 		BrushType = currType;
-		BrushPic = Pics.GetFirstWith("brick");
+		BrushPic = Pics.GetFirstWith("abyss0");
 		panView = Pics.GetFirstWith("PanView");
 		mousePic = Pics.GetFirstWith("MouseWithWheel");
 		mapEditor = GetComponent<MapEditor>();
