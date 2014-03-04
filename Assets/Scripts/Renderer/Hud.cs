@@ -41,8 +41,8 @@ public class Hud : MonoBehaviour {
 	Rect screen;
 	int maxTilesAcross = 20;
 	int span = 32;
-	Color highlighted = Color.magenta;
-	Color editBox = Color.magenta;
+	Color highlighted = Color.yellow;
+	Color editBox = Color.yellow;
 	string defaultEditBox = "Type name here";
 	Texture panView;
 	Texture mousePic;
