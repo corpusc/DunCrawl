@@ -57,25 +57,51 @@ public class Hud : MonoBehaviour {
 		mousePic = Pics.GetFirstWith("MouseWithWheel");
 		mapEditor = GetComponent<MapEditor>();
 	}
-
+	
+	void Update() {
+		switch (Mode) {
+			case HudMode.Playing:
+				var p =	Player.O.transform.position;
+				p.z = Camera.main.transform.position.z;
+				Camera.main.transform.position = p;
+				break;
+		}
+	}
+	
 	void OnGUI() {
 		screen = new Rect(0, 0, Screen.width, Screen.height);
-
+		
 		// convert mouse pos to gui coordinates (y increasing DOWNwards)
 		mouPos = Input.mousePosition;
 		mouPos.y = Screen.height - mouPos.y;
 		
 		// hud state machine
 		switch (Mode) {
-			case HudMode.EditPalette:
-				drawTextureChoosingGrid();
-				break;
-//			case HudMode.EditMap:
-//				commonChrome();
-//				break;
-			default:
-				commonChrome();
-				break;
+		case HudMode.EditPalette:
+			drawTextureChoosingGrid();
+			break;
+		case HudMode.Playing:
+			commonChrome();
+			
+			if (Player.Class == Class.NotSelected) {
+				int w = Screen.width / (int)Class.Count-1;
+				int h = Screen.height/2;
+				GUILayout.BeginArea(new Rect(0, h, Screen.width, h));
+				GUILayout.BeginHorizontal();
+				for (int i = 1; i < (int)Class.Count; i++) {
+					if (GUILayout.Button("" + (Class)i, GUILayout.MinWidth(w), GUILayout.MinHeight(h)))
+						Player.Class = (Class)i;
+				}
+				GUILayout.EndHorizontal();
+				GUILayout.EndArea();
+			}else{
+				GUI.Box(new Rect(0, Screen.height - 30, Screen.width, 30), 
+				        "Level: " + Player.Level + "   " + Player.Class + "   HP: " + Player.Hp + "   XP: " + Player.Xp);
+			}
+			break;
+		default:
+			commonChrome();
+			break;
 		}
 	}
 

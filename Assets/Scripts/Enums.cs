@@ -15,6 +15,17 @@ public enum HudMode {
 	Count // used for iterating thru these
 };
 
+public enum Class {
+	NotSelected,
+	Wizard,
+	Warrior,
+	Rogue,
+	Monk,
+	Cleric,
+	
+	Count // used for iterating thru these
+}
+
 public enum ObjectType {
 	Deco, // decoration.  can be on top of walls/floors, UNDER items and players (maybe over, if its a web)
 	Floor,
