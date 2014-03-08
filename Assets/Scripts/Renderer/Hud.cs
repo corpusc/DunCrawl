@@ -5,6 +5,8 @@ public class Hud : MonoBehaviour {
 	public ObjectType BrushType;
 	public Texture BrushPic;
 	public string MapName;
+	public float BVS; // button vertical span
+	public float LVS; // label vertical span
 
 	private HudMode mode = HudMode.EditPalette;
 	public HudMode Mode { 
@@ -67,8 +69,20 @@ public class Hud : MonoBehaviour {
 				break;
 		}
 	}
-	
+
+	bool firstTime = true;
 	void OnGUI() {
+		if (firstTime) {
+			firstTime = false;
+			// setup vertical span sizes
+			GUIStyle gs = "Button";
+			var gc = new GUIContent("Playing");
+			BVS = gs.CalcSize(gc).y;
+			gs = "Label";
+			gc = new GUIContent("Playing");
+			LVS = gs.CalcSize(gc).y;
+		}
+
 		screen = new Rect(0, 0, Screen.width, Screen.height);
 		
 		// convert mouse pos to gui coordinates (y increasing DOWNwards)

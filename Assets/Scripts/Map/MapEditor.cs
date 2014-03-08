@@ -10,18 +10,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class MapEditor : MonoBehaviour {
 	// private
 	Hud hud;
+	Game game;
 	char splitSeperator = '-';
-	Vector3 mouPos; // mouse position on screen
-	Vector3 mouWorldPos; // mouse position in the world
 	GameObject cursorCell; // what the selection pointer is hovering-over/pointing-at
-	GameObject entireFloor; // the single black background that covers the whole possible floor space.
-		// this way we don't have a bunch of objects in the scene just to represent every single blank cell.
-		// instead, we only store and do calculations on objects that the player can see and interact with.
 
 	// in-world chrome 
 	// quad positioning and spans
-	Vector3 horiBarCenter;
-	Vector3 vertBarCenter;
 	Vector3 pastMaxX;
 	Vector3 pastMaxY;
 	Vector3 stretchX;
@@ -31,20 +25,17 @@ public class MapEditor : MonoBehaviour {
 	Texture cursOk; // for valid cursor
 	Texture cursBad; // for invalid cursor
 
-	// realtime version of map
-	List<TileDataRealtime>[,] cellsRealtime = new List<TileDataRealtime>[S.CellsAcross, S.CellsAcross];
-
 
 
 	void Start() {
 		hud = this.GetComponent<Hud>();
+		game = this.GetComponent<Game>();
 
 
 		cursOk = Pics.GetFirstWith("cursor");
 		cursBad = Pics.GetFirstWith("cursor_red");
 		var bumpLeft = new Vector3(-1, 0, 0);
 		var bumpDown = new Vector3(0, -1, 0);
-		var farBack = new Vector3(0, 0, 1.5f);
 		var near = new Vector3(0, 0, 0.1f);
 
 		setQuadPositioningAndSpans();
@@ -53,36 +44,29 @@ public class MapEditor : MonoBehaviour {
 		// make the boundaries of the floor
 		var v = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		v.name = "Boundary Top";
-		v.transform.position = farBack + horiBarCenter + pastMaxY;
+		v.transform.position = game.farBack + game.horiBarCenter + pastMaxY;
 		v.transform.localScale = stretchX;
 		picSetting(v, "cursor_green");
 		
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		v.name = "Boundary Bottom";
-		v.transform.position = farBack + horiBarCenter + bumpDown;
+		v.transform.position = game.farBack + game.horiBarCenter + bumpDown;
 		v.transform.localScale = stretchX;
 		picSetting(v, "cursor_green");
 
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		v.name = "Boundary Left";
-		v.transform.position = farBack + vertBarCenter + bumpLeft;
+		v.transform.position = game.farBack + game.vertBarCenter + bumpLeft;
 		v.transform.localScale = stretchY;
 		picSetting(v, "cursor_green");
 
 		v = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		v.name = "Boundary Right";
-		v.transform.position = farBack + vertBarCenter + pastMaxX;
+		v.transform.position = game.farBack + game.vertBarCenter + pastMaxX;
 		v.transform.localScale = stretchY;
 		picSetting(v, "cursor_green");
 
 
-		
-		entireFloor = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		entireFloor.name = "Map Chunk Backdrop";
-		entireFloor.transform.position = farBack + horiBarCenter + vertBarCenter;
-		entireFloor.transform.localScale = Vector3.Scale(stretchX, stretchY);
-		picSetting(entireFloor, "cursor_green");
-		entireFloor.renderer.material.mainTexture = Pics.Black;
 		
 		cursorCell = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		cursorCell.name = "Cursor";
@@ -114,43 +98,30 @@ public class MapEditor : MonoBehaviour {
 
 	int prevX;
 	int prevY;
-	Vector3 prevMouPos;
-	void Update() { // first we have screen mouse pos, 
-		// ...................then world position, 
-		// ...................then quantized world position (to match the cell grid)
-		if (Input.GetMouseButtonDown(2)) {
-			prevMouPos = mouPos = Input.mousePosition;
-		}else{
-		    prevMouPos = mouPos;
-			mouPos = Input.mousePosition;
-		}
-	    
-		mouPos.z = 0.4f;//10.0f;
-		mouWorldPos = Camera.main.ScreenToWorldPoint(mouPos);
-
+	void Update() { // ................then quantized world position (to match the cell grid)
 		if (Input.GetMouseButton(2))
-			Camera.main.transform.position -= (mouPos - prevMouPos) / 50f;
+			Camera.main.transform.position -= (game.mouPos - game.prevMouPos) / 50f;
 
-		if (scaledUnitSquareContains(mouWorldPos, entireFloor)) {
-			int x = (int)((mouWorldPos.x + 0.5f) / 1f);
-			int y = (int)((mouWorldPos.y + 0.5f) / 1f);
-			mouWorldPos.x = x;
-			mouWorldPos.y = y;
+		if (scaledUnitSquareContains(game.mouWorldPos, game.entireFloor)) {
+			int x = (int)((game.mouWorldPos.x + 0.5f) / 1f);
+			int y = (int)((game.mouWorldPos.y + 0.5f) / 1f);
+			game.mouWorldPos.x = x;
+			game.mouWorldPos.y = y;
 
 			// if just now pressed
 			if (Input.GetMouseButtonDown(0)) {
-				makeRealtimeQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
+				game.makeRealtimeQuad(game.mouWorldPos, hud.BrushType, hud.BrushPic);
 			}
 			if (Input.GetMouseButtonDown(1)) {
-				destroyOneQuad(mouWorldPos);
+				destroyOneQuad(game.mouWorldPos);
 			}
 
 			if (!(x == prevX && y == prevY)) {
 				// we just moved to a new cell
 				if (Input.GetMouseButton(0))
-					makeRealtimeQuad(mouWorldPos, hud.BrushType, hud.BrushPic);
+					game.makeRealtimeQuad(game.mouWorldPos, hud.BrushType, hud.BrushPic);
 				if (Input.GetMouseButton(1))
-					destroyOneQuad(mouWorldPos);
+					destroyOneQuad(game.mouWorldPos);
 			}
 
 			prevX = x;
@@ -161,14 +132,14 @@ public class MapEditor : MonoBehaviour {
 			cursorCell.renderer.material.mainTexture = cursBad;
 		}
 
-		cursorCell.transform.position = mouWorldPos;
+		cursorCell.transform.position = game.mouWorldPos;
 	}
 	
 	void destroyOneQuad(int x, int y) {
 		destroyOneQuad(new Vector3(x, y, 0));
 	}
 	void destroyOneQuad(Vector3 pos) {
-		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
+		var cl = game.cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
 	
 		if (cl == null || cl.Count < 1)
 			return;
@@ -176,62 +147,6 @@ public class MapEditor : MonoBehaviour {
 		Destroy(cl[cl.Count-1].O);
 		cl.RemoveAt(cl.Count-1);
 		Debug.Log("destroyQuad()");
-	}
-		
-	void makeRealtimeQuad(Vector3 pos, ObjectType type, Texture pic) {
-		if (hud.Mode != HudMode.EditMap)
-			return;
-
-		pos.z = 1f;
-
-		// don't make, if user is clicking part of the button strip at top of screen
-		GUIStyle style = "Button";
-		var gc = new GUIContent("Playing");
-		if (mouPos.y >= Screen.height - style.CalcSize(gc).y)
-			return;
-
-		bool addingNewQuad = false;
-		var cl = cellsRealtime[(int)pos.y, (int)pos.x]; // cell list
-		//Debug.Log("pos.x: " + (int)pos.x + "  pos.y: " + (int)pos.y);
-
-		if (cl == null) {
-			cl = cellsRealtime[(int)pos.y, (int)pos.x] = new List<TileDataRealtime>();
-			//Debug.Log("     cell was null, made a new list     ");
-		}
-		
-		if (cl.Count < 1) {
-			addingNewQuad = true;
-			//Debug.Log("     cell had empty list     ");
-		}
-
-		// replace if brush is the same type as something else in the list
-		for (int i = cl.Count-1; i >= 0; i--) {
-			//Debug.Log("     at least one PicData here     ");
-
-			if (cl[i].Type == hud.BrushType) {
-				Destroy(cl[i].O);
-				cl.RemoveAt(i);
-				addingNewQuad = true;
-			}
-		}
-
-		if (addingNewQuad) {
-			var td = new TileDataRealtime();
-			var o = GameObject.CreatePrimitive(PrimitiveType.Quad);
-			o.transform.parent = entireFloor.transform;
-			o.transform.position = pos;
-			//o.renderer.material.shader = Shader.Find("Unlit/Transparent");
-			o.renderer.material.mainTexture = pic;
-			if (type == ObjectType.Wall) {
-				var po = new GameObject();
-				po.transform.parent = entireFloor.transform;
-				po.transform.position = pos;
-				po.AddComponent<BoxCollider2D>();
-			}
-			td.Type = type;
-			td.O = o;
-			cellsRealtime[(int)pos.y, (int)pos.x].Add(td);
-		}
 	}
 
 	bool scaledUnitSquareContains(Vector3 v, GameObject o) {
@@ -248,9 +163,6 @@ public class MapEditor : MonoBehaviour {
 	}
 
 	void setQuadPositioningAndSpans() {
-		float f = (S.CellsAcross * 0.5f) - 0.5f;
-		horiBarCenter = new Vector3(f, 0, 0);
-		vertBarCenter = new Vector3(0, f, 0);
 		pastMaxX = new Vector3(S.CellsAcross, 0, 0);
 		pastMaxY = new Vector3(0, S.CellsAcross, 0);
 		stretchX = new Vector3(S.CellsAcross, 1, 1);
@@ -281,8 +193,8 @@ public class MapEditor : MonoBehaviour {
 
 			for (int y = 0; y < S.CellsAcross; y++) {
 				for (int x = 0; x < S.CellsAcross; x++) {
-					if (cellsRealtime[y,x] != null)	{
-						while (cellsRealtime[y,x].Count > 0)
+					if (game.cellsRealtime[y,x] != null)	{
+						while (game.cellsRealtime[y,x].Count > 0)
 							destroyOneQuad(x, y);
 					}
 
@@ -294,7 +206,7 @@ public class MapEditor : MonoBehaviour {
 							Debug.Log("t: " + t);
 							var pic = Pics.Get("" + t, mf.Pics[c.Pic]);
 							Debug.Log("mf.Pics[c.Pic]: " + mf.Pics[c.Pic]);
-							makeRealtimeQuad(new Vector3(x, y, 0), t, pic);
+							game.makeRealtimeQuad(new Vector3(x, y, 0), t, pic);
 						}
 					}
 				}
@@ -319,12 +231,12 @@ public class MapEditor : MonoBehaviour {
 		var mf = new MapFormat();
 		for (int y = 0; y < S.CellsAcross; y++) {
 			for (int x = 0; x < S.CellsAcross; x++) {
-				if (cellsRealtime[y,x] != null && 
-				    cellsRealtime[y,x].Count > 0)
+				if (game.cellsRealtime[y,x] != null && 
+				    game.cellsRealtime[y,x].Count > 0)
 				{
 					mf.Cells[y,x] = new List<TileData>();
 
-					foreach (var rt in cellsRealtime[y,x]) {
+					foreach (var rt in game.cellsRealtime[y,x]) {
 						var picName = rt.O.renderer.material.mainTexture.name;
 						int ti = mf.Types.IndexOf("" + rt.Type); // type index
 						int pi = mf.Pics.IndexOf(picName);   // pic index
